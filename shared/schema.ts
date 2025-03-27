@@ -44,7 +44,7 @@ export const prompts = pgTable("prompts", {
   stage: text("stage").notNull(), // Ask, Tell, Reveal
   question: text("question").notNull(),
   context: text("context").notNull(),
-  hintWords: json("hint_words").notNull().$type<string[]>(),
+  hintWords: text("hint_words").array().notNull(),
 });
 
 export const insertPromptSchema = createInsertSchema(prompts).pick({

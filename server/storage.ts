@@ -1,6 +1,8 @@
 import { users, type User, type InsertUser } from "@shared/schema";
 import { topics, type Topic, type InsertTopic } from "@shared/schema";
 import { prompts, type Prompt, type InsertPrompt } from "@shared/schema";
+import { db } from "./db";
+import { eq, and } from "drizzle-orm";
 
 // modify the interface with any CRUD methods
 // you might need
@@ -20,70 +22,64 @@ export interface IStorage {
   createPrompt(prompt: InsertPrompt): Promise<Prompt>;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private topics: Map<number, Topic>;
-  private prompts: Map<number, Prompt>;
-  userCurrentId: number;
-  topicCurrentId: number;
-  promptCurrentId: number;
-
-  constructor() {
-    this.users = new Map();
-    this.topics = new Map();
-    this.prompts = new Map();
-    this.userCurrentId = 1;
-    this.topicCurrentId = 1;
-    this.promptCurrentId = 1;
-  }
-
+export class DatabaseStorage implements IStorage {
   // User methods
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const result = await db.select().from(users).where(eq(users.id, id)).limit(1);
+    return result[0];
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
+    const result = await db.select().from(users).where(eq(users.username, username)).limit(1);
+    return result[0];
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.userCurrentId++;
-    const user: User = { ...insertUser, id };
-    this.users.set(id, user);
-    return user;
+    const result = await db.insert(users).values(insertUser).returning();
+    return result[0];
   }
   
   // Topic methods
   async getAllTopics(): Promise<Topic[]> {
-    return Array.from(this.topics.values());
+    return await db.select().from(topics);
   }
   
   async getTopicById(id: number): Promise<Topic | undefined> {
-    return this.topics.get(id);
+    const result = await db.select().from(topics).where(eq(topics.id, id)).limit(1);
+    return result[0];
   }
   
   async createTopic(insertTopic: InsertTopic): Promise<Topic> {
-    const id = this.topicCurrentId++;
-    const topic: Topic = { ...insertTopic, id };
-    this.topics.set(id, topic);
-    return topic;
+    const result = await db.insert(topics).values(insertTopic).returning();
+    return result[0];
   }
   
   // Prompt methods
   async getPromptsByLevelAndTopic(level: string, topicId: number): Promise<Prompt[]> {
-    return Array.from(this.prompts.values()).filter(
-      (prompt) => prompt.level === level && prompt.topicId === topicId
-    );
+    return await db.select()
+      .from(prompts)
+      .where(
+        and(
+          eq(prompts.level, level),
+          eq(prompts.topicId, topicId)
+        )
+      );
   }
   
   async createPrompt(insertPrompt: InsertPrompt): Promise<Prompt> {
-    const id = this.promptCurrentId++;
-    const prompt: Prompt = { ...insertPrompt, id };
-    this.prompts.set(id, prompt);
-    return prompt;
+    // Create a typed prompt object to ensure it matches the schema
+    const typedPromptData: typeof insertPrompt = {
+      topicId: insertPrompt.topicId,
+      level: insertPrompt.level,
+      stage: insertPrompt.stage,
+      question: insertPrompt.question,
+      context: insertPrompt.context,
+      hintWords: insertPrompt.hintWords
+    };
+    
+    const result = await db.insert(prompts).values(typedPromptData).returning();
+    return result[0];
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new DatabaseStorage();
