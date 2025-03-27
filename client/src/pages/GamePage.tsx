@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, UseQueryOptions } from "@tanstack/react-query";
 import { useLocation, useRoute } from "wouter";
 import { motion } from "framer-motion";
 import GameHeader from "@/components/GameHeader";
@@ -10,6 +10,7 @@ import GameComplete from "@/components/GameComplete";
 import HelpModal from "@/components/HelpModal";
 import { Prompt, CEFRLevel, Topic, GamePrompts } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useToast } from "@/hooks/use-toast";
 
 export default function GamePage() {
   const [, params] = useRoute("/game");
@@ -23,18 +24,29 @@ export default function GamePage() {
   const [showHelpModal, setShowHelpModal] = useState<boolean>(false);
   const [showComplete, setShowComplete] = useState<boolean>(false);
   const [, navigate] = useLocation();
+  const { toast } = useToast();
 
   // Fetch topic by ID for the header
-  const { data: topic, isLoading: isTopicLoading } = useQuery<Topic | null>({
-    queryKey: [`/api/topics/${topicId}`],
-    initialData: null,
+  const { data: topic, isLoading: isTopicLoading } = useQuery<Topic>({
+    queryKey: [`/api/topics/${topicId}`]
   });
 
   // Fetch prompts based on level and topic
-  const { data: promptsData, isLoading: isPromptsLoading, error } = useQuery<GamePrompts | null>({
-    queryKey: [`/api/prompts?level=${level}&topicId=${topicId}`],
-    initialData: null,
+  const { data: promptsData, isLoading: isPromptsLoading, error } = useQuery<GamePrompts>({
+    queryKey: [`/api/prompts?level=${level}&topicId=${topicId}`]
   });
+
+  // Log the current state for debugging
+  useEffect(() => {
+    console.log("GamePage state:", { 
+      level, 
+      topicId, 
+      topic,
+      promptsData,
+      isLoading: { topic: isTopicLoading, prompts: isPromptsLoading },
+      error
+    });
+  }, [level, topicId, topic, promptsData, isTopicLoading, isPromptsLoading, error]);
 
   const handleNext = () => {
     if (currentStage < 2) {

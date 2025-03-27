@@ -1,10 +1,11 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import LevelSelector from "@/components/LevelSelector";
 import TopicSelector from "@/components/TopicSelector";
 import HelpModal from "@/components/HelpModal";
 import { CEFRLevel, Topic } from "@/lib/types";
+import { useToast } from "@/hooks/use-toast";
 
 export default function Home() {
   const [selectedLevel, setSelectedLevel] = useState<CEFRLevel>("B1");
@@ -12,10 +13,24 @@ export default function Home() {
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
   const [_, navigate] = useLocation();
+  const { toast } = useToast();
+
+  // Log state changes for debugging
+  useEffect(() => {
+    console.log("Home state:", { selectedLevel, selectedTopic });
+  }, [selectedLevel, selectedTopic]);
 
   const handleStartGame = () => {
     if (selectedTopic) {
-      navigate(`/game?level=${selectedLevel}&topic=${selectedTopic.id}`);
+      const url = `/game?level=${selectedLevel}&topic=${selectedTopic.id}`;
+      console.log("Navigating to:", url);
+      navigate(url);
+    } else {
+      toast({
+        title: "Select a topic",
+        description: "Please select a topic before starting.",
+        variant: "default",
+      });
     }
   };
 
