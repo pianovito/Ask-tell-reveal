@@ -5,7 +5,6 @@ import { motion } from "framer-motion";
 import GameHeader from "@/components/GameHeader";
 import PromptCard from "@/components/PromptCard";
 import HintWords from "@/components/HintWords";
-import TimerControl from "@/components/TimerControl";
 import GameComplete from "@/components/GameComplete";
 import HelpModal from "@/components/HelpModal";
 import { Prompt, CEFRLevel, Topic, GamePrompts } from "@/lib/types";
@@ -32,10 +31,6 @@ export default function GamePage() {
   // Store a randomized sequence of stages (0, 1, 2 shuffled)
   const [stageSequence, setStageSequence] = useState<number[]>([]);
   const [currentStageIndex, setCurrentStageIndex] = useState<number>(0);
-  const [usedPrompts, setUsedPrompts] = useState<Set<number>>(new Set());
-  
-  const [timerRunning, setTimerRunning] = useState<boolean>(true);
-  const [timeRemaining, setTimeRemaining] = useState<number>(30);
   const [showHelpModal, setShowHelpModal] = useState<boolean>(false);
   const [showComplete, setShowComplete] = useState<boolean>(false);
   const [wantNewPrompts, setWantNewPrompts] = useState<boolean>(false);
@@ -59,8 +54,6 @@ export default function GamePage() {
       setStageSequence(shuffleArray([0, 1, 2]));
       setCurrentStageIndex(0);
       setWantNewPrompts(false);
-      setTimeRemaining(30);
-      setTimerRunning(true);
       
       // Log the new sequence for debugging
       console.log("New randomized stage sequence created");
@@ -86,12 +79,9 @@ export default function GamePage() {
     if (currentStageIndex < stageSequence.length - 1) {
       // Move to the next stage in our sequence
       setCurrentStageIndex(prev => prev + 1);
-      setTimeRemaining(30);
-      setTimerRunning(true);
     } else if (wantNewPrompts) {
       // We're waiting for new prompts to load
-      setTimeRemaining(30);
-      setTimerRunning(true);
+      console.log("Ready for new prompts");
     } else {
       // We've completed all stages in the current sequence
       // Instead of showing "complete", ask if they want to continue with new prompts
@@ -108,10 +98,6 @@ export default function GamePage() {
     setShowComplete(true);
   };
 
-  const handleToggleTimer = () => {
-    setTimerRunning(prev => !prev);
-  };
-
   const handleRestart = () => {
     navigate("/");
   };
@@ -125,24 +111,6 @@ export default function GamePage() {
     const stageIndex = stageSequence[currentStageIndex];
     return promptsData.stages[stageIndex];
   };
-  
-  // Get current stage name for the header
-  const getCurrentStageName = (): string => {
-    if (!currentPrompt) return "";
-    return currentPrompt.stage;
-  };
-
-  useEffect(() => {
-    let timer: NodeJS.Timeout;
-
-    if (timerRunning && timeRemaining > 0) {
-      timer = setTimeout(() => {
-        setTimeRemaining(prev => prev - 1);
-      }, 1000);
-    }
-
-    return () => clearTimeout(timer);
-  }, [timerRunning, timeRemaining]);
 
   if (isPromptsLoading || isTopicLoading) {
     return (
@@ -304,12 +272,14 @@ export default function GamePage() {
                     words={currentPrompt.hintWords}
                   />
                 
-                  <TimerControl 
-                    timeRemaining={timeRemaining}
-                    timerRunning={timerRunning}
-                    onToggleTimer={handleToggleTimer}
-                    onNext={handleNext}
-                  />
+                  <div className="flex justify-end mt-6">
+                    <Button
+                      onClick={handleNext}
+                      className="bg-[#3498db] hover:bg-[#3498db]/90 text-white font-semibold px-6 py-2 rounded-full"
+                    >
+                      Next <i className="fas fa-arrow-right ml-2"></i>
+                    </Button>
+                  </div>
                 </motion.div>
               ) : null}
             </>
