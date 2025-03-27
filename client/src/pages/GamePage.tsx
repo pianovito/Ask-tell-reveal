@@ -192,7 +192,17 @@ export default function GamePage() {
               </h1>
             </div>
             <div className="flex items-center space-x-4">
-              <button className="text-[#333333] hover:text-[#3498db] transition-colors">
+              <button 
+                className="text-[#333333] hover:text-[#3498db] transition-colors"
+                onClick={() => navigate("/")}
+                title="Back to Home"
+              >
+                <i className="fas fa-home text-xl"></i>
+              </button>
+              <button 
+                className="text-[#333333] hover:text-[#3498db] transition-colors"
+                title="Help"
+              >
                 <i className="fas fa-question-circle text-xl"></i>
               </button>
             </div>
@@ -264,7 +274,15 @@ export default function GamePage() {
           <div className="flex items-center space-x-4">
             <button 
               className="text-[#333333] hover:text-[#3498db] transition-colors"
+              onClick={() => navigate("/")}
+              title="Back to Home"
+            >
+              <i className="fas fa-home text-xl"></i>
+            </button>
+            <button 
+              className="text-[#333333] hover:text-[#3498db] transition-colors"
               onClick={() => setShowHelpModal(true)}
+              title="Help"
             >
               <i className="fas fa-question-circle text-xl"></i>
             </button>
@@ -332,17 +350,34 @@ export default function GamePage() {
                   exit={{ opacity: 0, y: -20 }}
                   transition={{ duration: 0.3 }}
                 >
-                  <div className="bg-white rounded-xl shadow-md p-6 mb-6">
-                    <h3 className="font-['Quicksand'] font-bold text-xl mb-4 text-center">
-                      {stageSequence[currentStageIndex] === 0 ? (
-                        <span className="text-[#3498db]">Ask</span>
-                      ) : stageSequence[currentStageIndex] === 1 ? (
-                        <span className="text-[#f39c12]">Tell</span>
-                      ) : (
-                        <span className="text-[#9b59b6]">Reveal</span>
-                      )}
-                    </h3>
-                    <div className="text-center p-6 bg-gray-50 rounded-lg">
+                  <div className={`rounded-xl shadow-md p-6 mb-6 border-2 ${
+                      stageSequence[currentStageIndex] === 0 
+                        ? "bg-blue-50 border-blue-200" 
+                        : stageSequence[currentStageIndex] === 1 
+                          ? "bg-amber-50 border-amber-200" 
+                          : "bg-purple-50 border-purple-200"
+                    }`}>
+                    <div className="flex items-center justify-center mb-4">
+                      <span className="bg-white rounded-full h-10 w-10 flex items-center justify-center shadow-sm mr-3">
+                        <i className={`${
+                          stageSequence[currentStageIndex] === 0 
+                            ? "fas fa-question text-[#3498db]" 
+                            : stageSequence[currentStageIndex] === 1 
+                              ? "fas fa-comment text-[#f39c12]" 
+                              : "fas fa-star text-[#9b59b6]"
+                        } text-xl`}></i>
+                      </span>
+                      <h3 className="font-['Quicksand'] font-bold text-2xl text-center">
+                        {stageSequence[currentStageIndex] === 0 ? (
+                          <span className="text-[#3498db]">Ask</span>
+                        ) : stageSequence[currentStageIndex] === 1 ? (
+                          <span className="text-[#f39c12]">Tell</span>
+                        ) : (
+                          <span className="text-[#9b59b6]">Reveal</span>
+                        )}
+                      </h3>
+                    </div>
+                    <div className="text-center p-6 bg-white rounded-lg shadow-sm">
                       <p className="text-lg mb-4">
                         {stageSequence[currentStageIndex] === 0 ? (
                           <>Ask your partner a question about <strong>{topic?.name}</strong></>
@@ -352,9 +387,9 @@ export default function GamePage() {
                           <>Reveal something personal related to <strong>{topic?.name}</strong></>
                         )}
                       </p>
-                      <p className="text-gray-500 text-sm italic">
-                        Free mode - create your own conversation prompts
-                      </p>
+                      <div className="inline-block bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
+                        <i className="fas fa-lightbulb mr-1 text-yellow-500"></i> Free Mode
+                      </div>
                     </div>
                   </div>
                 

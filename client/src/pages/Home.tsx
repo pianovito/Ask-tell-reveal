@@ -94,14 +94,15 @@ export default function Home() {
           />
 
           {/* Free Mode Toggle */}
-          <div className="mt-6 flex items-center justify-center space-x-2 p-4 bg-white rounded-lg shadow-sm">
+          <div className={`mt-6 flex items-center justify-center space-x-2 p-4 rounded-lg shadow-sm ${isFreeMode ? 'bg-blue-50 border border-blue-200' : 'bg-white'} transition-colors`}>
             <Switch 
               id="free-mode"
               checked={isFreeMode}
               onCheckedChange={setIsFreeMode}
+              className={isFreeMode ? "data-[state=checked]:bg-[#3498db]" : ""}
             />
             <Label htmlFor="free-mode" className="cursor-pointer">
-              <span className="font-medium">Free Mode</span>
+              <span className={`font-medium ${isFreeMode ? 'text-[#3498db]' : ''}`}>Free Mode</span>
               <p className="text-sm text-gray-500 mt-1">
                 Practice with only the topic and randomized activity types (without specific prompts)
               </p>
