@@ -4,12 +4,13 @@ import { CEFRLevel } from "@/lib/types";
 interface GameHeaderProps {
   level: CEFRLevel;
   topic: string;
-  currentStage: number;
+  currentStage: string;
+  stageIndex: number;
+  totalStages: number;
 }
 
-export default function GameHeader({ level, topic, currentStage }: GameHeaderProps) {
-  const stages = ["Ask", "Tell", "Reveal"];
-
+export default function GameHeader({ level, topic, currentStage, stageIndex, totalStages }: GameHeaderProps) {
+  // Display the stage name at the top
   return (
     <div className="mb-8 flex flex-col md:flex-row justify-between items-center">
       <div className="mb-4 md:mb-0">
@@ -22,37 +23,29 @@ export default function GameHeader({ level, topic, currentStage }: GameHeaderPro
         </div>
       </div>
       
-      {/* Progress Indicator */}
-      <div className="flex items-center space-x-2">
-        {stages.map((stage, index) => (
-          <div key={stage} className="flex items-center">
-            {index > 0 && <div className="w-6 h-0.5 bg-gray-300"></div>}
-            <div className="flex items-center space-x-1">
-              <motion.div 
-                className={`h-4 w-4 rounded-full ${
-                  index === currentStage 
-                    ? "bg-[#3498db]" 
-                    : index < currentStage 
-                      ? "bg-[#2ecc71]" 
-                      : "bg-gray-200"
-                }`}
-                animate={index === currentStage ? { scale: [1, 1.2, 1] } : {}}
-                transition={{ repeat: Infinity, duration: 2 }}
-              />
-              <span 
-                className={`text-xs font-semibold ${
-                  index === currentStage 
-                    ? "text-[#3498db]" 
-                    : index < currentStage
-                      ? "text-[#2ecc71]"
-                      : "text-gray-400"
-                }`}
-              >
-                {stage}
-              </span>
-            </div>
-          </div>
-        ))}
+      {/* Current Stage Indicator */}
+      <div className="flex flex-col items-center">
+        <div className="text-center mb-1">
+          <span className="font-semibold text-lg text-[#3498db]">{currentStage}</span>
+        </div>
+        
+        {/* Progress Indicator */}
+        <div className="flex items-center space-x-1">
+          {Array.from({ length: totalStages }).map((_, index) => (
+            <motion.div 
+              key={index}
+              className={`h-3 w-3 rounded-full ${
+                index === stageIndex 
+                  ? "bg-[#3498db]" 
+                  : index < stageIndex 
+                    ? "bg-[#2ecc71]" 
+                    : "bg-gray-200"
+              }`}
+              animate={index === stageIndex ? { scale: [1, 1.2, 1] } : {}}
+              transition={{ repeat: Infinity, duration: 2 }}
+            />
+          ))}
+        </div>
       </div>
     </div>
   );

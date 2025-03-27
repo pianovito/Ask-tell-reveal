@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { useQuery, UseQueryOptions } from "@tanstack/react-query";
+import { useState, useEffect, useCallback } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { useLocation, useRoute } from "wouter";
 import { motion } from "framer-motion";
 import GameHeader from "@/components/GameHeader";
@@ -11,6 +11,17 @@ import HelpModal from "@/components/HelpModal";
 import { Prompt, CEFRLevel, Topic, GamePrompts } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+
+// Function to shuffle an array (Fisher-Yates algorithm)
+function shuffleArray<T>(array: T[]): T[] {
+  const shuffled = [...array];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  return shuffled;
+}
 
 export default function GamePage() {
   const [, params] = useRoute("/game");
@@ -18,11 +29,16 @@ export default function GamePage() {
   const level = searchParams.get("level") as CEFRLevel || "B1";
   const topicId = searchParams.get("topic") || "1";
   
-  const [currentStage, setCurrentStage] = useState<number>(0);
+  // Store a randomized sequence of stages (0, 1, 2 shuffled)
+  const [stageSequence, setStageSequence] = useState<number[]>([]);
+  const [currentStageIndex, setCurrentStageIndex] = useState<number>(0);
+  const [usedPrompts, setUsedPrompts] = useState<Set<number>>(new Set());
+  
   const [timerRunning, setTimerRunning] = useState<boolean>(true);
   const [timeRemaining, setTimeRemaining] = useState<number>(30);
   const [showHelpModal, setShowHelpModal] = useState<boolean>(false);
   const [showComplete, setShowComplete] = useState<boolean>(false);
+  const [wantNewPrompts, setWantNewPrompts] = useState<boolean>(false);
   const [, navigate] = useLocation();
   const { toast } = useToast();
 
@@ -36,6 +52,21 @@ export default function GamePage() {
     queryKey: [`/api/prompts?level=${level}&topicId=${topicId}`]
   });
 
+  // Initialize or refresh stage sequence when prompts data is loaded or when requesting new prompts
+  useEffect(() => {
+    if (promptsData?.stages && (stageSequence.length === 0 || wantNewPrompts)) {
+      // Create a new randomized sequence
+      setStageSequence(shuffleArray([0, 1, 2]));
+      setCurrentStageIndex(0);
+      setWantNewPrompts(false);
+      setTimeRemaining(30);
+      setTimerRunning(true);
+      
+      // Log the new sequence for debugging
+      console.log("New randomized stage sequence created");
+    }
+  }, [promptsData, wantNewPrompts]);
+
   // Log the current state for debugging
   useEffect(() => {
     console.log("GamePage state:", { 
@@ -43,19 +74,38 @@ export default function GamePage() {
       topicId, 
       topic,
       promptsData,
+      stageSequence,
+      currentStageIndex,
+      currentStage: stageSequence[currentStageIndex],
       isLoading: { topic: isTopicLoading, prompts: isPromptsLoading },
       error
     });
-  }, [level, topicId, topic, promptsData, isTopicLoading, isPromptsLoading, error]);
+  }, [level, topicId, topic, promptsData, stageSequence, currentStageIndex, isTopicLoading, isPromptsLoading, error]);
 
-  const handleNext = () => {
-    if (currentStage < 2) {
-      setCurrentStage(prev => prev + 1);
+  const handleNext = useCallback(() => {
+    if (currentStageIndex < stageSequence.length - 1) {
+      // Move to the next stage in our sequence
+      setCurrentStageIndex(prev => prev + 1);
+      setTimeRemaining(30);
+      setTimerRunning(true);
+    } else if (wantNewPrompts) {
+      // We're waiting for new prompts to load
       setTimeRemaining(30);
       setTimerRunning(true);
     } else {
-      setShowComplete(true);
+      // We've completed all stages in the current sequence
+      // Instead of showing "complete", ask if they want to continue with new prompts
+      setWantNewPrompts(true);
     }
+  }, [currentStageIndex, stageSequence, wantNewPrompts]);
+
+  const handleContinue = () => {
+    // Trigger the generation of a new sequence
+    setWantNewPrompts(true);
+  };
+
+  const handleEndActivity = () => {
+    setShowComplete(true);
   };
 
   const handleToggleTimer = () => {
@@ -71,8 +121,15 @@ export default function GamePage() {
   };
 
   const getCurrentPrompt = (): Prompt | undefined => {
-    if (!promptsData || !promptsData.stages) return undefined;
-    return promptsData.stages[currentStage];
+    if (!promptsData?.stages || stageSequence.length === 0) return undefined;
+    const stageIndex = stageSequence[currentStageIndex];
+    return promptsData.stages[stageIndex];
+  };
+  
+  // Get current stage name for the header
+  const getCurrentStageName = (): string => {
+    if (!currentPrompt) return "";
+    return currentPrompt.stage;
   };
 
   useEffect(() => {
@@ -190,12 +247,49 @@ export default function GamePage() {
               <GameHeader 
                 level={level}
                 topic={topic?.name || "Topic"}
-                currentStage={currentStage}
+                currentStage={currentPrompt?.stage || ""}
+                stageIndex={currentStageIndex}
+                totalStages={stageSequence.length}
               />
 
-              {currentPrompt && (
+              {wantNewPrompts ? (
                 <motion.div
-                  key={currentStage}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                  className="bg-white rounded-xl shadow-md p-6 text-center"
+                >
+                  <div className="mb-6">
+                    <div className="text-3xl text-[#3498db] mb-4">
+                      <i className="fas fa-check-circle"></i>
+                    </div>
+                    <h3 className="font-['Quicksand'] font-bold text-xl mb-2">
+                      Great job!
+                    </h3>
+                    <p className="text-gray-600 mb-4">
+                      You've completed this set of prompts. Would you like to continue with a new set of randomized prompts or end this practice session?
+                    </p>
+                  </div>
+                  
+                  <div className="flex justify-center gap-4">
+                    <Button
+                      onClick={handleContinue}
+                      className="bg-[#3498db] hover:bg-[#3498db]/90 text-white font-semibold px-6 py-2 rounded-full"
+                    >
+                      <i className="fas fa-redo mr-2"></i> Continue Practice
+                    </Button>
+                    <Button
+                      onClick={handleEndActivity}
+                      variant="outline"
+                      className="border-gray-300 text-gray-700 hover:bg-gray-100 font-semibold px-6 py-2 rounded-full"
+                    >
+                      <i className="fas fa-check mr-2"></i> End Session
+                    </Button>
+                  </div>
+                </motion.div>
+              ) : currentPrompt ? (
+                <motion.div
+                  key={`${currentStageIndex}-${currentPrompt.stage}`}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
@@ -217,7 +311,7 @@ export default function GamePage() {
                     onNext={handleNext}
                   />
                 </motion.div>
-              )}
+              ) : null}
             </>
           ) : (
             <GameComplete 
