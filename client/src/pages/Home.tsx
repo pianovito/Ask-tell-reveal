@@ -1,0 +1,98 @@
+import { useState } from "react";
+import { useLocation } from "wouter";
+import { Button } from "@/components/ui/button";
+import LevelSelector from "@/components/LevelSelector";
+import TopicSelector from "@/components/TopicSelector";
+import HelpModal from "@/components/HelpModal";
+import { CEFRLevel, Topic } from "@/lib/types";
+
+export default function Home() {
+  const [selectedLevel, setSelectedLevel] = useState<CEFRLevel>("B1");
+  const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
+  const [showHelpModal, setShowHelpModal] = useState(false);
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [_, navigate] = useLocation();
+
+  const handleStartGame = () => {
+    if (selectedTopic) {
+      navigate(`/game?level=${selectedLevel}&topic=${selectedTopic.id}`);
+    }
+  };
+
+  return (
+    <div className="bg-[#f5f7fa] min-h-screen font-['Nunito']">
+      {/* Header */}
+      <header className="bg-white shadow-md">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <div className="flex items-center space-x-2">
+            <span className="text-[#3498db] text-3xl">
+              <i className="fas fa-comments"></i>
+            </span>
+            <h1 className="font-['Quicksand'] font-bold text-2xl md:text-3xl text-[#333333]">
+              <span className="text-[#3498db]">Ask</span>,
+              <span className="text-[#f39c12]">Tell</span>,
+              <span className="text-[#9b59b6]">Reveal</span>
+            </h1>
+          </div>
+          <div className="flex items-center space-x-4">
+            <button 
+              className="text-[#333333] hover:text-[#3498db] transition-colors"
+              onClick={() => setShowHelpModal(true)}
+            >
+              <i className="fas fa-question-circle text-xl"></i>
+            </button>
+            <button 
+              className="text-[#333333] hover:text-[#3498db] transition-colors"
+              onClick={() => setShowSettingsModal(true)}
+            >
+              <i className="fas fa-cog text-xl"></i>
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="text-center mb-8">
+            <h2 className="font-['Quicksand'] font-bold text-2xl md:text-3xl text-[#333333] mb-2">
+              Let's Practice Speaking!
+            </h2>
+            <p className="text-gray-600 max-w-lg mx-auto">
+              Choose your English level and a conversation topic to get started with personalized speaking prompts.
+            </p>
+          </div>
+
+          {/* Level Selector */}
+          <LevelSelector 
+            selectedLevel={selectedLevel} 
+            onLevelChange={setSelectedLevel} 
+          />
+
+          {/* Topic Selector */}
+          <TopicSelector 
+            selectedTopic={selectedTopic} 
+            onTopicSelect={setSelectedTopic} 
+          />
+
+          {/* Start Button */}
+          <div className="mt-8 text-center">
+            <Button
+              onClick={handleStartGame}
+              disabled={!selectedTopic}
+              className="bg-[#3498db] hover:bg-[#3498db]/90 text-white font-bold py-3 px-8 rounded-full transition-colors shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <i className="fas fa-play mr-2"></i> Start Practice
+            </Button>
+          </div>
+        </div>
+      </main>
+
+      {/* Help Modal */}
+      <HelpModal 
+        isOpen={showHelpModal} 
+        onClose={() => setShowHelpModal(false)} 
+      />
+    </div>
+  );
+}
