@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
 import LevelSelector from "@/components/LevelSelector";
 import TopicSelector from "@/components/TopicSelector";
 import HelpModal from "@/components/HelpModal";
@@ -12,17 +14,18 @@ export default function Home() {
   const [selectedTopic, setSelectedTopic] = useState<Topic | null>(null);
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [isFreeMode, setIsFreeMode] = useState(false);
   const [_, navigate] = useLocation();
   const { toast } = useToast();
 
   // Log state changes for debugging
   useEffect(() => {
-    console.log("Home state:", { selectedLevel, selectedTopic });
-  }, [selectedLevel, selectedTopic]);
+    console.log("Home state:", { selectedLevel, selectedTopic, isFreeMode });
+  }, [selectedLevel, selectedTopic, isFreeMode]);
 
   const handleStartGame = () => {
     if (selectedTopic) {
-      const url = `/game?level=${selectedLevel}&topic=${selectedTopic.id}`;
+      const url = `/game?level=${selectedLevel}&topic=${selectedTopic.id}&freeMode=${isFreeMode}`;
       console.log("Navigating to:", url);
       navigate(url);
     } else {
@@ -89,6 +92,21 @@ export default function Home() {
             selectedTopic={selectedTopic} 
             onTopicSelect={setSelectedTopic} 
           />
+
+          {/* Free Mode Toggle */}
+          <div className="mt-6 flex items-center justify-center space-x-2 p-4 bg-white rounded-lg shadow-sm">
+            <Switch 
+              id="free-mode"
+              checked={isFreeMode}
+              onCheckedChange={setIsFreeMode}
+            />
+            <Label htmlFor="free-mode" className="cursor-pointer">
+              <span className="font-medium">Free Mode</span>
+              <p className="text-sm text-gray-500 mt-1">
+                Practice with only the topic and randomized activity types (without specific prompts)
+              </p>
+            </Label>
+          </div>
 
           {/* Start Button */}
           <div className="mt-8 text-center">

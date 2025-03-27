@@ -27,6 +27,7 @@ export default function GamePage() {
   const searchParams = new URLSearchParams(window.location.search);
   const level = searchParams.get("level") as CEFRLevel || "B1";
   const topicId = searchParams.get("topic") || "1";
+  const isFreeMode = searchParams.get("freeMode") === "true";
   
   // Store a randomized sequence of stages (0, 1, 2 shuffled)
   const [stageSequence, setStageSequence] = useState<number[]>([]);
@@ -48,13 +49,24 @@ export default function GamePage() {
   
   // Fetch prompts based on level and topic
   // Include continue=true parameter when user wants fresh prompts
+  // Add freeMode parameter to indicate we're in free mode
   const { data: promptsData, isLoading: isPromptsLoading, error, refetch } = useQuery<GamePrompts>({
-    queryKey: [`/api/prompts?level=${level}&topicId=${topicId}&counter=${promptsCounter}&continue=${continuePractice}`]
+    queryKey: [`/api/prompts?level=${level}&topicId=${topicId}&counter=${promptsCounter}&continue=${continuePractice}&freeMode=${isFreeMode}`],
+    // Don't fetch prompts in free mode if isFreeMode is true
+    enabled: !isFreeMode
   });
 
   // Initialize or refresh stage sequence when prompts data is loaded or when requesting new prompts
   useEffect(() => {
-    if (promptsData?.stages && (stageSequence.length === 0 || wantNewPrompts)) {
+    // For free mode, we just need to initialize a randomized sequence
+    if (isFreeMode && (stageSequence.length === 0 || wantNewPrompts)) {
+      setStageSequence(shuffleArray([0, 1, 2]));
+      setCurrentStageIndex(0);
+      setWantNewPrompts(false);
+      console.log("Free Mode: New randomized stage sequence created");
+    }
+    // For normal mode with prompts from the API
+    else if (!isFreeMode && promptsData?.stages && (stageSequence.length === 0 || wantNewPrompts)) {
       // Create a new randomized sequence
       setStageSequence(shuffleArray([0, 1, 2]));
       setCurrentStageIndex(0);
@@ -69,7 +81,7 @@ export default function GamePage() {
       // Log the new sequence for debugging
       console.log("New randomized stage sequence created");
     }
-  }, [promptsData, wantNewPrompts, continuePractice]);
+  }, [promptsData, wantNewPrompts, continuePractice, isFreeMode]);
 
   // Log the current state for debugging
   useEffect(() => {
@@ -91,18 +103,22 @@ export default function GamePage() {
       // Move to the next stage in our sequence
       setCurrentStageIndex(prev => prev + 1);
       
-      // Generate new prompts after each stage to ensure variety
-      // Increment the counter to force a new fetch
-      const newCounter = promptsCounter + 1;
-      setPromptsCounter(newCounter);
-      
-      // Set continue flag to true to force fresh prompts on every "Next" click
-      setContinuePractice(true);
-      
-      // Explicitly force a refetch but don't update the UI yet
-      refetch();
-      
-      console.log(`Generating fresh prompts in the background after Next button click (counter=${newCounter})`);
+      // In normal mode, generate new prompts after each stage to ensure variety
+      if (!isFreeMode) {
+        // Increment the counter to force a new fetch
+        const newCounter = promptsCounter + 1;
+        setPromptsCounter(newCounter);
+        
+        // Set continue flag to true to force fresh prompts on every "Next" click
+        setContinuePractice(true);
+        
+        // Explicitly force a refetch but don't update the UI yet
+        refetch();
+        
+        console.log(`Generating fresh prompts in the background after Next button click (counter=${newCounter})`);
+      } else {
+        console.log("Free mode: moving to next stage without prompts");
+      }
     } else if (wantNewPrompts) {
       // We're waiting for new prompts to load
       console.log("Ready for new prompts");
@@ -111,9 +127,19 @@ export default function GamePage() {
       // Instead of showing "complete", ask if they want to continue with new prompts
       setWantNewPrompts(true);
     }
-  }, [currentStageIndex, stageSequence, wantNewPrompts, promptsCounter, refetch]);
+  }, [currentStageIndex, stageSequence, wantNewPrompts, promptsCounter, refetch, isFreeMode]);
 
   const handleContinue = () => {
+    // In free mode, we just need to generate a new sequence
+    if (isFreeMode) {
+      setStageSequence(shuffleArray([0, 1, 2]));
+      setCurrentStageIndex(0);
+      setWantNewPrompts(false);
+      console.log("Free Mode: Continuing with new randomized sequence");
+      return;
+    }
+    
+    // In normal mode with prompts:
     // Increment the counter to force a new fetch
     const newCounter = promptsCounter + 1;
     setPromptsCounter(newCounter);
@@ -149,7 +175,8 @@ export default function GamePage() {
     return promptsData.stages[stageIndex];
   };
 
-  if (isPromptsLoading || isTopicLoading) {
+  // Only show loading when we're fetching topic or (prompts and not in free mode)
+  if (isTopicLoading || (!isFreeMode && isPromptsLoading)) {
     return (
       <div className="bg-[#f5f7fa] min-h-screen font-['Nunito']">
         <header className="bg-white shadow-md">
@@ -252,7 +279,12 @@ export default function GamePage() {
               <GameHeader 
                 level={level}
                 topic={topic?.name || "Topic"}
-                currentStage={currentPrompt?.stage || ""}
+                currentStage={
+                  isFreeMode ? 
+                    (stageSequence[currentStageIndex] === 0 ? "Ask" : 
+                    stageSequence[currentStageIndex] === 1 ? "Tell" : "Reveal") : 
+                    (currentPrompt?.stage || "")
+                }
                 stageIndex={currentStageIndex}
                 totalStages={stageSequence.length}
               />
@@ -289,6 +321,49 @@ export default function GamePage() {
                       className="border-gray-300 text-gray-700 hover:bg-gray-100 font-semibold px-6 py-2 rounded-full"
                     >
                       <i className="fas fa-check mr-2"></i> End Session
+                    </Button>
+                  </div>
+                </motion.div>
+              ) : isFreeMode && stageSequence.length > 0 ? (
+                <motion.div
+                  key={`free-mode-${currentStageIndex}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <div className="bg-white rounded-xl shadow-md p-6 mb-6">
+                    <h3 className="font-['Quicksand'] font-bold text-xl mb-4 text-center">
+                      {stageSequence[currentStageIndex] === 0 ? (
+                        <span className="text-[#3498db]">Ask</span>
+                      ) : stageSequence[currentStageIndex] === 1 ? (
+                        <span className="text-[#f39c12]">Tell</span>
+                      ) : (
+                        <span className="text-[#9b59b6]">Reveal</span>
+                      )}
+                    </h3>
+                    <div className="text-center p-6 bg-gray-50 rounded-lg">
+                      <p className="text-lg mb-4">
+                        {stageSequence[currentStageIndex] === 0 ? (
+                          <>Ask your partner a question about <strong>{topic?.name}</strong></>
+                        ) : stageSequence[currentStageIndex] === 1 ? (
+                          <>Tell your partner something about <strong>{topic?.name}</strong></>
+                        ) : (
+                          <>Reveal something personal related to <strong>{topic?.name}</strong></>
+                        )}
+                      </p>
+                      <p className="text-gray-500 text-sm italic">
+                        Free mode - create your own conversation prompts
+                      </p>
+                    </div>
+                  </div>
+                
+                  <div className="flex justify-end mt-6">
+                    <Button
+                      onClick={handleNext}
+                      className="bg-[#3498db] hover:bg-[#3498db]/90 text-white font-semibold px-6 py-2 rounded-full"
+                    >
+                      Next <i className="fas fa-arrow-right ml-2"></i>
                     </Button>
                   </div>
                 </motion.div>
