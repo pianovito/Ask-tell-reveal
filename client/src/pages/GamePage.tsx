@@ -90,6 +90,19 @@ export default function GamePage() {
     if (currentStageIndex < stageSequence.length - 1) {
       // Move to the next stage in our sequence
       setCurrentStageIndex(prev => prev + 1);
+      
+      // Generate new prompts after each stage to ensure variety
+      // Increment the counter to force a new fetch
+      const newCounter = promptsCounter + 1;
+      setPromptsCounter(newCounter);
+      
+      // Set continue flag to true to force fresh prompts on every "Next" click
+      setContinuePractice(true);
+      
+      // Explicitly force a refetch but don't update the UI yet
+      refetch();
+      
+      console.log(`Generating fresh prompts in the background after Next button click (counter=${newCounter})`);
     } else if (wantNewPrompts) {
       // We're waiting for new prompts to load
       console.log("Ready for new prompts");
@@ -98,7 +111,7 @@ export default function GamePage() {
       // Instead of showing "complete", ask if they want to continue with new prompts
       setWantNewPrompts(true);
     }
-  }, [currentStageIndex, stageSequence, wantNewPrompts]);
+  }, [currentStageIndex, stageSequence, wantNewPrompts, promptsCounter, refetch]);
 
   const handleContinue = () => {
     // Increment the counter to force a new fetch

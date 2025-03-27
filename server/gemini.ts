@@ -9,13 +9,18 @@ const genAI = new GoogleGenerativeAI(apiKey);
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
 export async function generatePrompts(level: string, topicName: string): Promise<PromptResponse> {
+  // Generate a random seed to ensure uniqueness of each generation
+  const randomSeed = Math.floor(Math.random() * 10000000);
+  console.log(`🎲 Using random seed: ${randomSeed} for ${topicName} prompts at level ${level}`);
   try {
     if (!apiKey) {
       throw new Error("GEMINI_API_KEY environment variable not set");
     }
     
     const prompt = `
-    Create a set of ESL speaking practice prompts for the "Ask, Tell, Reveal" activity format at CEFR level ${level} about the topic "${topicName}".
+    Create a COMPLETELY UNIQUE set of ESL speaking practice prompts for the "Ask, Tell, Reveal" activity format at CEFR level ${level} about the topic "${topicName}". Random seed: ${randomSeed}
+
+    IMPORTANT: Make sure these prompts are DIFFERENT from any you've generated before. Use the random seed value ${randomSeed} to create unique variations.
 
     Please provide three prompts following this structure:
     1. "Ask" - IMPORTANT: This should be a prompt instructing the student to ask ANOTHER student a specific question. The question should begin with "Ask your partner about..." or similar phrasing.
@@ -25,7 +30,7 @@ export async function generatePrompts(level: string, topicName: string): Promise
     For each prompt, provide:
     - A clear question (remember "Ask" must instruct the student to ask ANOTHER student something)
     - A brief context to help guide the student's response
-    - 5 helpful hint words that students can use in their answers
+    - 5 helpful hint words that students can use in their answers that are DIFFERENT from previous prompts
 
     Format your response as a valid JSON object with this structure:
     {
