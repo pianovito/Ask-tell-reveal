@@ -18,12 +18,12 @@ export async function generatePrompts(level: string, topicName: string): Promise
     Create a set of ESL speaking practice prompts for the "Ask, Tell, Reveal" activity format at CEFR level ${level} about the topic "${topicName}".
 
     Please provide three prompts following this structure:
-    1. "Ask" - A general question about the topic
-    2. "Tell" - A deeper follow-up question that requires more detailed responses
-    3. "Reveal" - A question that encourages the student to share something personal or unique
+    1. "Ask" - IMPORTANT: This should be a prompt instructing the student to ask ANOTHER student a specific question. The question should begin with "Ask your partner about..." or similar phrasing.
+    2. "Tell" - A deeper follow-up question that requires more detailed responses.
+    3. "Reveal" - A question that encourages the student to share something personal or unique.
 
     For each prompt, provide:
-    - A clear question
+    - A clear question (remember "Ask" must instruct the student to ask ANOTHER student something)
     - A brief context to help guide the student's response
     - 5 helpful hint words that students can use in their answers
 
@@ -77,9 +77,9 @@ export async function generatePrompts(level: string, topicName: string): Promise
       stages: [
         {
           stage: "Ask",
-          question: `What experiences have you had with ${topicName}?`,
-          context: `Think about your personal experiences related to ${topicName}.`,
-          hintWords: ["experience", "memorable", "opinion", "describe", "specific"]
+          question: `Ask your partner about their experiences with ${topicName}.`,
+          context: `Think about interesting aspects of ${topicName} you'd like to learn about from your partner.`,
+          hintWords: ["experiences", "memorable", "opinion", "specific", "feelings"]
         },
         {
           stage: "Tell",

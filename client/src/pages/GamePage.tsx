@@ -34,6 +34,7 @@ export default function GamePage() {
   const [showHelpModal, setShowHelpModal] = useState<boolean>(false);
   const [showComplete, setShowComplete] = useState<boolean>(false);
   const [wantNewPrompts, setWantNewPrompts] = useState<boolean>(false);
+  const [promptsCounter, setPromptsCounter] = useState<number>(0); // Counter to force refetch
   const [, navigate] = useLocation();
   const { toast } = useToast();
 
@@ -43,8 +44,11 @@ export default function GamePage() {
   });
 
   // Fetch prompts based on level and topic
-  const { data: promptsData, isLoading: isPromptsLoading, error } = useQuery<GamePrompts>({
-    queryKey: [`/api/prompts?level=${level}&topicId=${topicId}`]
+  // Include the counter in the query key to force new prompts when continuing
+  const { data: promptsData, isLoading: isPromptsLoading, error, refetch } = useQuery<GamePrompts>({
+    queryKey: [`/api/prompts?level=${level}&topicId=${topicId}&counter=${promptsCounter}`],
+    // Force the query to be fresh when counter changes
+    staleTime: 0
   });
 
   // Initialize or refresh stage sequence when prompts data is loaded or when requesting new prompts
@@ -90,8 +94,12 @@ export default function GamePage() {
   }, [currentStageIndex, stageSequence, wantNewPrompts]);
 
   const handleContinue = () => {
-    // Trigger the generation of a new sequence
+    // Increment the counter to force a new fetch
+    setPromptsCounter(prev => prev + 1);
+    // Flag that we want new prompts to update the sequence
     setWantNewPrompts(true);
+    // Log what we're doing
+    console.log("Continuing with new prompts - forcing a refetch");
   };
 
   const handleEndActivity = () => {

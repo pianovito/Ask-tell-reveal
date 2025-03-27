@@ -53,21 +53,29 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Topic not found" });
       }
 
-      // Check if prompts are already in storage
-      const existingPrompts = await storage.getPromptsByLevelAndTopic(parsedLevel, parsedTopicId);
+      // Check for refreshPrompts query parameter to handle force refreshing
+      const forceRefresh = req.query.refreshPrompts === 'true';
       
-      if (existingPrompts && existingPrompts.length > 0) {
-        // Format into stages array
-        const formattedPrompts = {
-          stages: existingPrompts.map(prompt => ({
-            stage: prompt.stage,
-            question: prompt.question,
-            context: prompt.context,
-            hintWords: prompt.hintWords
-          }))
-        };
+      // If there's a counter parameter in the URL (incremented by client), we'll always generate new prompts
+      const counterParam = req.query.counter;
+      
+      // Check if prompts are already in storage (but only use them if not forcing a refresh)
+      if (!forceRefresh && !counterParam) {
+        const existingPrompts = await storage.getPromptsByLevelAndTopic(parsedLevel, parsedTopicId);
         
-        return res.json(formattedPrompts);
+        if (existingPrompts && existingPrompts.length > 0) {
+          // Format into stages array
+          const formattedPrompts = {
+            stages: existingPrompts.map(prompt => ({
+              stage: prompt.stage,
+              question: prompt.question,
+              context: prompt.context,
+              hintWords: prompt.hintWords
+            }))
+          };
+          
+          return res.json(formattedPrompts);
+        }
       }
 
       // Generate new prompts using Gemini
