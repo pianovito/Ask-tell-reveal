@@ -53,14 +53,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Topic not found" });
       }
 
-      // Check for refreshPrompts query parameter to handle force refreshing
-      const forceRefresh = req.query.refreshPrompts === 'true';
-      
-      // If there's a counter parameter in the URL (incremented by client), we'll always generate new prompts
+      // Always generate new prompts if there's a counter parameter
+      // This ensures users always get fresh prompts when continuing practice
       const counterParam = req.query.counter;
       
-      // Check if prompts are already in storage (but only use them if not forcing a refresh)
-      if (!forceRefresh && !counterParam) {
+      // If no counter parameter (first load only), we might use existing prompts
+      if (!counterParam) {
         const existingPrompts = await storage.getPromptsByLevelAndTopic(parsedLevel, parsedTopicId);
         
         if (existingPrompts && existingPrompts.length > 0) {
@@ -77,6 +75,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
           return res.json(formattedPrompts);
         }
       }
+      
+      console.log("Generating fresh prompts for level:", parsedLevel, "topic:", topic.name, "counter:", counterParam);
 
       // Generate new prompts using Gemini
       const prompts = await generatePrompts(parsedLevel, topic.name);

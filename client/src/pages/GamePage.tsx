@@ -46,9 +46,7 @@ export default function GamePage() {
   // Fetch prompts based on level and topic
   // Include the counter in the query key to force new prompts when continuing
   const { data: promptsData, isLoading: isPromptsLoading, error, refetch } = useQuery<GamePrompts>({
-    queryKey: [`/api/prompts?level=${level}&topicId=${topicId}&counter=${promptsCounter}`],
-    // Force the query to be fresh when counter changes
-    staleTime: 0
+    queryKey: [`/api/prompts?level=${level}&topicId=${topicId}&counter=${promptsCounter}`]
   });
 
   // Initialize or refresh stage sequence when prompts data is loaded or when requesting new prompts
@@ -95,11 +93,17 @@ export default function GamePage() {
 
   const handleContinue = () => {
     // Increment the counter to force a new fetch
-    setPromptsCounter(prev => prev + 1);
+    const newCounter = promptsCounter + 1;
+    setPromptsCounter(newCounter);
+    
     // Flag that we want new prompts to update the sequence
     setWantNewPrompts(true);
+    
+    // Explicitly force a refetch
+    refetch();
+    
     // Log what we're doing
-    console.log("Continuing with new prompts - forcing a refetch");
+    console.log(`Continuing with new prompts - forcing a refetch with counter: ${newCounter}`);
   };
 
   const handleEndActivity = () => {
