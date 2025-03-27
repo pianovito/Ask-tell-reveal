@@ -53,18 +53,25 @@ export async function registerRoutes(app: Express): Promise<Server> {
         return res.status(404).json({ message: "Topic not found" });
       }
 
-      // Always generate new prompts if there's a counter parameter
-      // This ensures users always get fresh prompts when continuing practice
-      const counterParam = req.query.counter;
+      // Always generate fresh prompts if the continue=true parameter is present
+      // This parameter is sent when the user completes all three stages and wants to continue practice
+      const continueParam = req.query.continue === 'true';
       
-      // If no counter parameter (first load only), we might use existing prompts
-      if (!counterParam) {
+      // If explicitly requesting continued practice with new prompts, bypass all cache
+      if (continueParam) {
+        console.log("Continue parameter detected - bypassing cache and generating fresh prompts");
+      } 
+      // For initial load, we can use cached prompts if they exist
+      else {
         const existingPrompts = await storage.getPromptsByLevelAndTopic(parsedLevel, parsedTopicId);
         
-        if (existingPrompts && existingPrompts.length > 0) {
-          // Format into stages array
+        if (existingPrompts && existingPrompts.length > 0 && existingPrompts.length >= 3) {
+          // Format into stages array, but only use the most recent 3 prompts
+          // This prevents showing old prompts from previous sessions
+          const recentPrompts = existingPrompts.slice(0, 3);
+          
           const formattedPrompts = {
-            stages: existingPrompts.map(prompt => ({
+            stages: recentPrompts.map(prompt => ({
               stage: prompt.stage,
               question: prompt.question,
               context: prompt.context,
@@ -76,7 +83,12 @@ export async function registerRoutes(app: Express): Promise<Server> {
         }
       }
       
-      console.log("Generating fresh prompts for level:", parsedLevel, "topic:", topic.name, "counter:", counterParam);
+      // Always log when generating new prompts
+      if (continueParam) {
+        console.log(`🔄 REGENERATING PROMPTS: User continued practice with level=${parsedLevel}, topic=${topic.name}, continue=true`);
+      } else {
+        console.log(`🆕 GENERATING PROMPTS: Initial load with level=${parsedLevel}, topic=${topic.name}`);
+      }
 
       // Generate new prompts using Gemini
       const prompts = await generatePrompts(parsedLevel, topic.name);

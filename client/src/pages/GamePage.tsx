@@ -43,10 +43,13 @@ export default function GamePage() {
     queryKey: [`/api/topics/${topicId}`]
   });
 
+  // Continue parameter is set to true when user wants to continue with new prompts
+  const [continuePractice, setContinuePractice] = useState<boolean>(false);
+  
   // Fetch prompts based on level and topic
-  // Include the counter in the query key to force new prompts when continuing
+  // Include continue=true parameter when user wants fresh prompts
   const { data: promptsData, isLoading: isPromptsLoading, error, refetch } = useQuery<GamePrompts>({
-    queryKey: [`/api/prompts?level=${level}&topicId=${topicId}&counter=${promptsCounter}`]
+    queryKey: [`/api/prompts?level=${level}&topicId=${topicId}&counter=${promptsCounter}&continue=${continuePractice}`]
   });
 
   // Initialize or refresh stage sequence when prompts data is loaded or when requesting new prompts
@@ -57,10 +60,16 @@ export default function GamePage() {
       setCurrentStageIndex(0);
       setWantNewPrompts(false);
       
+      // Reset continue flag after successful fetch
+      if (continuePractice) {
+        setContinuePractice(false);
+        console.log("Reset continuePractice flag after successful fetch of new prompts");
+      }
+      
       // Log the new sequence for debugging
       console.log("New randomized stage sequence created");
     }
-  }, [promptsData, wantNewPrompts]);
+  }, [promptsData, wantNewPrompts, continuePractice]);
 
   // Log the current state for debugging
   useEffect(() => {
@@ -96,6 +105,9 @@ export default function GamePage() {
     const newCounter = promptsCounter + 1;
     setPromptsCounter(newCounter);
     
+    // Set continue flag to true to force fresh prompts
+    setContinuePractice(true);
+    
     // Flag that we want new prompts to update the sequence
     setWantNewPrompts(true);
     
@@ -103,7 +115,7 @@ export default function GamePage() {
     refetch();
     
     // Log what we're doing
-    console.log(`Continuing with new prompts - forcing a refetch with counter: ${newCounter}`);
+    console.log(`Continuing with new prompts - forcing a refetch with continue=true and counter=${newCounter}`);
   };
 
   const handleEndActivity = () => {
