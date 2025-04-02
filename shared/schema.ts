@@ -45,6 +45,7 @@ export const prompts = pgTable("prompts", {
   question: text("question").notNull(),
   context: text("context").notNull(),
   hintWords: text("hint_words").array().notNull(),
+  metadata: json("metadata").default({}).notNull(), // Store session info, timestamps, and other metadata
 });
 
 export const insertPromptSchema = createInsertSchema(prompts).pick({
@@ -53,7 +54,8 @@ export const insertPromptSchema = createInsertSchema(prompts).pick({
   stage: true,
   question: true,
   context: true,
-  hintWords: true
+  hintWords: true,
+  metadata: true
 });
 
 export type InsertPrompt = z.infer<typeof insertPromptSchema>;

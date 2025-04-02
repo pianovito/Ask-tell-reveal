@@ -93,6 +93,10 @@ export async function registerRoutes(app: Express): Promise<Server> {
       // Generate new prompts using Gemini
       const prompts = await generatePrompts(parsedLevel, topic.name);
       
+      // Add a session identifier to track groups of prompts generated together
+      // This helps ensure diversity in future sessions
+      const sessionId = `session_${Date.now()}`;
+      
       // Store the generated prompts
       for (const prompt of prompts.stages) {
         await storage.createPrompt({
@@ -101,7 +105,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
           stage: prompt.stage,
           question: prompt.question, 
           context: prompt.context,
-          hintWords: prompt.hintWords
+          hintWords: prompt.hintWords,
+          // Add metadata to help track prompt diversity
+          metadata: {
+            sessionId,
+            timestamp: Date.now(),
+            // Track explicit theme/aspect of the topic to avoid repetition
+            aspect: prompt.question.split(" ").slice(0, 8).join(" ") // Extract first few words as a simple signature
+          }
         });
       }
       

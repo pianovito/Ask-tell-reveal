@@ -20,7 +20,14 @@ export async function generatePrompts(level: string, topicName: string): Promise
     const prompt = `
     Create a COMPLETELY UNIQUE set of ESL speaking practice prompts for the "Ask, Tell, Reveal" activity format at CEFR level ${level} about the topic "${topicName}". Random seed: ${randomSeed}
 
-    IMPORTANT: Make sure these prompts are DIFFERENT from any you've generated before. Use the random seed value ${randomSeed} to create unique variations.
+    CRITICAL REQUIREMENT: Each prompt (Ask, Tell, Reveal) MUST be EXTREMELY DIFFERENT from each other in these ways:
+    - Focus on completely different aspects of the "${topicName}" topic - avoid any thematic overlap
+    - Use entirely different vocabulary domains and hint words
+    - Address different time periods (past/present/future) when appropriate
+    - Cover different emotional contexts (positive/neutral/challenging)
+    - Target different cognitive skills (remembering/analyzing/describing/imagining/evaluating)
+
+    IMPORTANT: Make sure these prompts are RADICALLY DIFFERENT from any you've generated before. Use the random seed value ${randomSeed} to create maximally diverse variations.
 
     Please provide three prompts following this structure:
     1. "Ask" - IMPORTANT: This should be a prompt instructing the student to ask ANOTHER student a specific question. The question should begin with "Ask your partner about..." or similar phrasing.
@@ -30,7 +37,7 @@ export async function generatePrompts(level: string, topicName: string): Promise
     For each prompt, provide:
     - A clear question (remember "Ask" must instruct the student to ask ANOTHER student something)
     - A brief context to help guide the student's response
-    - 5 helpful hint words that students can use in their answers that are DIFFERENT from previous prompts
+    - 5 helpful hint words that students can use in their answers that MUST be COMPLETELY DIFFERENT from the other prompts
 
     Format your response as a valid JSON object with this structure:
     {
