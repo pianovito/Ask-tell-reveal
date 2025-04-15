@@ -7,6 +7,7 @@ import PromptCard from "@/components/PromptCard";
 import HintWords from "@/components/HintWords";
 import GameComplete from "@/components/GameComplete";
 import HelpModal from "@/components/HelpModal";
+import GroupAchievements from "@/components/GroupAchievements";
 import { Prompt, CEFRLevel, Topic, GamePrompts } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
@@ -257,15 +258,15 @@ export default function GamePage() {
   const currentPrompt = getCurrentPrompt();
 
   return (
-    <div className="bg-[#f5f7fa] min-h-screen font-['Nunito']">
+    <div className="bg-gradient-to-b from-[#ecf0f1] to-[#e0f2e9] min-h-screen font-['Nunito']">
       {/* Header */}
       <header className="bg-white shadow-md">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-2">
             <span className="text-[#3498db] text-3xl">
-              <i className="fas fa-comments"></i>
+              <i className="fas fa-comments animate-pulse-glow"></i>
             </span>
-            <h1 className="font-['Quicksand'] font-bold text-2xl md:text-3xl text-[#333333]">
+            <h1 className="font-['Quicksand'] font-bold text-2xl md:text-3xl text-[#34495e]">
               <span className="text-[#3498db]">Ask</span>,
               <span className="text-[#f39c12]">Tell</span>,
               <span className="text-[#9b59b6]">Reveal</span>
@@ -273,14 +274,14 @@ export default function GamePage() {
           </div>
           <div className="flex items-center space-x-4">
             <button 
-              className="text-[#333333] hover:text-[#3498db] transition-colors"
+              className="text-[#34495e] hover:text-[#3498db] transition-colors"
               onClick={() => navigate("/")}
               title="Back to Home"
             >
               <i className="fas fa-home text-xl"></i>
             </button>
             <button 
-              className="text-[#333333] hover:text-[#3498db] transition-colors"
+              className="text-[#34495e] hover:text-[#3498db] transition-colors"
               onClick={() => setShowHelpModal(true)}
               title="Help"
             >
@@ -289,6 +290,9 @@ export default function GamePage() {
           </div>
         </div>
       </header>
+      
+      {/* Group Achievements Panel */}
+      <GroupAchievements topicId={topicId} level={level} />
 
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
