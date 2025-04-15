@@ -1,6 +1,8 @@
 import { motion } from "framer-motion";
 import { Prompt } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Badge } from "@/components/ui/badge";
+import { useEffect, useState } from "react";
 
 interface PromptCardProps {
   prompt: Prompt;
@@ -13,7 +15,39 @@ const stageColors = {
   "Reveal": "text-[#9b59b6]"
 };
 
+const stageBgColors = {
+  "Ask": "bg-[#3498db]/10",
+  "Tell": "bg-[#f39c12]/10",
+  "Reveal": "bg-[#9b59b6]/10"
+};
+
 export default function PromptCard({ prompt, isLoading }: PromptCardProps) {
+  // Random vocabulary challenge with 50% chance if not already set
+  const [vocabularyChallenge, setVocabularyChallenge] = useState<string | undefined>(prompt.vocabularyChallenge);
+  
+  useEffect(() => {
+    // If prompt already has a vocabulary challenge, use it
+    if (prompt.vocabularyChallenge) {
+      setVocabularyChallenge(prompt.vocabularyChallenge);
+      return;
+    }
+    
+    // 50% chance to add a vocabulary challenge
+    if (Math.random() > 0.5) {
+      // Select a random advanced word based on the current prompt
+      const advancedWords = [
+        "eloquent", "profound", "intricate", "meticulous", 
+        "jubilant", "nostalgic", "serene", "ambivalent",
+        "perplexing", "enigmatic", "spontaneous", "arduous"
+      ];
+      
+      const randomWord = advancedWords[Math.floor(Math.random() * advancedWords.length)];
+      setVocabularyChallenge(randomWord);
+    } else {
+      setVocabularyChallenge(undefined);
+    }
+  }, [prompt]);
+
   if (isLoading) {
     return (
       <div className="bg-white rounded-2xl shadow-md p-6 mb-6">
@@ -29,24 +63,46 @@ export default function PromptCard({ prompt, isLoading }: PromptCardProps) {
 
   return (
     <motion.div 
-      className="bg-white rounded-2xl shadow-md p-6 mb-6"
+      className={`${stageBgColors[prompt.stage]} rounded-2xl shadow-md p-6 mb-6 border border-${stageColors[prompt.stage].replace('text-', '')}/20`}
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="mb-2">
-        <span className={`font-['Comfortaa'] text-lg font-bold ${stageColors[prompt.stage]}`}>
+      <div className="flex justify-between items-center mb-3">
+        <span className={`font-['Quicksand'] text-lg font-bold ${stageColors[prompt.stage]}`}>
           {prompt.stage}
         </span>
+        
+        {/* Group XP Indicator */}
+        <Badge variant="secondary" className="bg-[#2ecc71]/20 text-[#2ecc71] hover:bg-[#2ecc71]/30">
+          <i className="fas fa-star mr-1 text-xs"></i> +5 XP
+        </Badge>
       </div>
       
-      <h3 className="font-['Quicksand'] text-xl md:text-2xl font-bold mb-2 text-[#333333]">
+      <h3 className="font-['Quicksand'] text-xl md:text-2xl font-bold mb-3 text-[#34495e]">
         {prompt.question}
       </h3>
       
-      <p className="text-gray-600 italic">
+      <p className="text-gray-600 italic mb-4">
         {prompt.context}
       </p>
+      
+      {/* Vocabulary Challenge */}
+      {vocabularyChallenge && (
+        <motion.div 
+          className="mt-4 p-3 bg-[#9b59b6]/10 border border-[#9b59b6]/20 rounded-lg"
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          transition={{ delay: 0.3 }}
+        >
+          <h4 className="flex items-center text-sm font-semibold text-[#9b59b6] mb-1">
+            <i className="fas fa-book mr-2"></i> Vocabulary Challenge
+          </h4>
+          <p className="text-sm text-gray-700">
+            Include the word <span className="font-bold">{vocabularyChallenge}</span> in your response for bonus XP!
+          </p>
+        </motion.div>
+      )}
     </motion.div>
   );
 }

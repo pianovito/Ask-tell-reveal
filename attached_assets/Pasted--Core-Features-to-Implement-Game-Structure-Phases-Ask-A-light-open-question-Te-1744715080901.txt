@@ -1,0 +1,71 @@
+ Core Features to Implement
+🧩 Game Structure
+* Phases:
+    * Ask – A light, open question.
+    * Tell – A deeper follow-up.
+    * Reveal – Prompts personal, previously unshared reflections.
+🎨 UI & Brand
+* Modern, playful interface using these colors:
+    * Primary: #3498db (Vibrant Blue)
+    * Secondary: #f39c12 (Soft Orange)
+    * Accents: #2ecc71, #9b59b6
+    * Text: #34495e
+    * Background: #ecf0f1 → gradient to light green.
+
+📘 Pedagogical Features
+* CEFR Level Selector (B1, B2, C1) – Adjusts question complexity.
+* Grammar Focus Mode – E.g., respond using second conditional.
+* Vocabulary Challenge – Include a target word in the response.
+* Reflection Prompt – Appears after Reveal for self-awareness.
+
+🧠 Content & Data
+* Fetch prompts and hint words from Google Gemini Flash 2 API based on CEFR and topic.
+* Topics (user selects): Childhood, Friendship, Travel, Dreams, Family, Embarrassment, etc.
+* Provide 3–4 hint words dynamically after question generation.
+
+🎮 Gamification (Group-Only)
+* Group XP System – Earn XP by completing rounds or using grammar targets.
+* Achievements – Class earns badges (e.g., “Everyone revealed once”).
+* Spin the Topic Wheel – Optional random topic chooser.
+* Pass-the-Question – Peer selects next speaker.
+* No single-user mode – Designed for teacher-led classrooms.
+
+* Use app icon animation while loading AI generated contents.
+* Add icons to the left of each text field using Tailwind CSS and an icon library (e.g., Heroicons or FontAwesome).
+* The icons should visually match the purpose of the text field:
+* Pen icon for text box to type in and generate content through AI
+* Bar chart for “CEFR Level”
+* Flask or beaker for “Story Theme”
+* Each icon should appear inside the input box or dropdown selector, aligned to the left, without breaking the layout.
+* Use flex or relative/absolute positioning to keep icons aligned while maintaining accessibility.
+* Use different font styles depending on the mood of your app:
+* Professional Look (Recommended):
+* Poppins, Roboto, Montserrat
+* Font-weight: 600 for headers, 400 for body
+* Example Usage: Title, subtitles, buttons
+* Alternative Fonts: Raleway, Muli
+* Friendly/Informal Look:
+* Font: Patrick Hand for handwritten, casual feel
+* Use for: Youthful or education-focused products
+* Font Sizes:
+* Title (Main Heading): font-size: 1.8rem
+* Subtitle: font-size: 1.2rem
+* Button Text: font-size: 1rem
+* Card Text: font-size: 0.9rem
+* Label/Caption: font-size: 0.8rem, uppercase
+* Buttons:
+* Rounded Corners: border-radius: 10px
+* Padding: padding: 10px 20px
+* Font Weight: font-weight: 600
+* Hover Effect: Slight darkening and scale-up
+* Example: transform: scale(1.03) and background-color: darken(color, 10%)
+* Icons (inside cards):
+Style: Flat, two-tone, centered icons
+* Icon Container: Square with rounded corners, padding: 10px
+* Icon Size: 32x32px
+* Text Alignment: Centered vertically and horizontally below icons
+* Call-to-Actions (Top Section):
+* Two buttons side-by-side:
+* Left: Coral Red - “Get Started”
+* Right: Royal Blue - “Log In”
+* Positioned under subtitle with margin: margin-top: 1rem
