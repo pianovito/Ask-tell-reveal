@@ -8,10 +8,14 @@ interface TopicSelectorProps {
 }
 
 const topicColors = {
-  primary: "bg-[#3498db]",
-  secondary: "bg-[#f39c12]",
-  accent1: "bg-[#2ecc71]",
-  accent2: "bg-[#9b59b6]"
+  primary: "bg-[#3498db]",      // Bright Blue
+  secondary: "bg-[#e74c3c]",    // Coral Red
+  accent1: "bg-[#2ecc71]",      // Emerald Green
+  accent2: "bg-[#9b59b6]",      // Royal Purple
+  accent3: "bg-[#f1c40f]",      // Golden Yellow
+  accent4: "bg-[#1abc9c]",      // Turquoise
+  accent5: "bg-[#e67e22]",      // Orange
+  accent6: "bg-[#34495e]"       // Dark Blue Grey
 };
 
 export default function TopicSelector({ selectedTopic, onTopicSelect }: TopicSelectorProps) {
