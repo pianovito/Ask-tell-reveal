@@ -29,6 +29,7 @@ export default function GamePage() {
   const searchParams = new URLSearchParams(window.location.search);
   const level = searchParams.get("level") as CEFRLevel || "B1";
   const topicId = searchParams.get("topic") || "1";
+  const customTopic = searchParams.get("customTopic") || "";
   const isFreeMode = searchParams.get("freeMode") === "true";
   
   // Store a randomized sequence of stages (0, 1, 2 shuffled)
@@ -38,6 +39,8 @@ export default function GamePage() {
   const [showComplete, setShowComplete] = useState<boolean>(false);
   const [wantNewPrompts, setWantNewPrompts] = useState<boolean>(false);
   const [promptsCounter, setPromptsCounter] = useState<number>(0); // Counter to force refetch
+  const [groupXP, setGroupXP] = useState<number>(0); // Track Group XP
+  const [freeKeywords, setFreeKeywords] = useState<string[]>([]); // Keywords for free mode
   const [, navigate] = useLocation();
   const { toast } = useToast();
 
@@ -169,6 +172,31 @@ export default function GamePage() {
 
   const handleNewTopic = () => {
     navigate("/");
+  };
+
+  const handleKeywordClick = (word: string) => {
+    // Add 1 XP per keyword clicked
+    setGroupXP(prev => prev + 1);
+    console.log(`Keyword clicked: ${word}, +1 XP added. Total: ${groupXP + 1}`);
+  };
+  
+  // Generate random keywords for Free Mode
+  const generateRandomKeywords = () => {
+    const topicWords = [
+      "describe", "explain", "discuss", "analyze", "compare", 
+      "contrast", "evaluate", "suggest", "consider", "explore",
+      "highlight", "focus", "emphasize", "elaborate", "clarify",
+      "illustrate", "demonstrate", "reflect", "examine", "investigate"
+    ];
+    
+    // Pick 5 random words
+    const randomWords = [];
+    const shuffledWords = shuffleArray([...topicWords]);
+    for (let i = 0; i < 5; i++) {
+      randomWords.push(shuffledWords[i]);
+    }
+    
+    return randomWords;
   };
 
   const getCurrentPrompt = (): Prompt | undefined => {
