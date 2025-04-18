@@ -43,8 +43,8 @@ export default function Home() {
       <header className="bg-white shadow-md">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center space-x-2">
-            <div className="bg-gradient-to-r from-blue-100 to-green-100 p-6 rounded-xl shadow-sm">
-              <h1 className="font-['Poppins'] font-bold text-4xl md:text-5xl text-center text-[#333333]">
+            <div className="bg-gradient-to-r from-blue-100 to-green-100 p-4 md:p-6 rounded-xl shadow-sm w-full md:w-auto">
+              <h1 className="font-['Poppins'] font-bold text-3xl sm:text-4xl md:text-5xl text-center text-[#333333]">
                 <span className="text-[#3498db]"><i className="fas fa-comments text-3xl mr-2"></i>Ask</span>,
                 <span className="text-[#f39c12]">Tell</span>, 
                 <span className="text-[#9b59b6]">Reveal</span>
