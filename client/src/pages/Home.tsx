@@ -98,9 +98,9 @@ export default function Home() {
             <Button
               onClick={handleStartGame}
               disabled={!selectedTopic}
-              className="bg-[#3498db] hover:bg-[#3498db]/90 text-white font-bold py-3 px-8 rounded-full transition-colors shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+              className="bg-[#3498db] hover:bg-[#3498db]/90 text-white font-bold text-lg py-4 px-10 rounded-full transition-colors shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <i className="fas fa-play mr-2"></i> Start Practice
+              <i className="fas fa-play mr-2"></i> Start Game
             </Button>
           </div>
         </div>
