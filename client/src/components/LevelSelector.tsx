@@ -1,5 +1,5 @@
 import { CEFRLevel } from "@/lib/types";
-import { ChartBarUp } from "lucide-react";
+import { BarChart } from "lucide-react";
 
 interface LevelSelectorProps {
   selectedLevel: CEFRLevel;
@@ -10,7 +10,7 @@ export default function LevelSelector({ selectedLevel, onLevelChange }: LevelSel
   return (
     <div className="mb-8">
       <h3 className="font-['Quicksand'] font-semibold text-xl text-[#333333] mb-4 flex items-center gap-2">
-        <ChartBarUp className="w-5 h-5" />
+        <BarChart className="w-5 h-5" />
         CEFR level:
       </h3>
       <div className="level-selector flex flex-wrap justify-center gap-4">
