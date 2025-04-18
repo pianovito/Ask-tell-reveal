@@ -22,7 +22,8 @@ export default function TopicSelector({ selectedTopic, onTopicSelect }: TopicSel
   if (isLoading) {
     return (
       <div>
-        <h3 className="font-['Quicksand'] font-semibold text-xl text-[#333333] mb-4">
+        <h3 className="font-['Quicksand'] font-semibold text-xl text-[#333333] mb-4 flex items-center gap-2">
+          <i className="fas fa-comments"></i>
           Choose a Conversation Topic:
         </h3>
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
