@@ -1,4 +1,5 @@
 import { CEFRLevel } from "@/lib/types";
+import { GraduationCap } from "lucide-react";
 
 interface LevelSelectorProps {
   selectedLevel: CEFRLevel;
@@ -8,8 +9,9 @@ interface LevelSelectorProps {
 export default function LevelSelector({ selectedLevel, onLevelChange }: LevelSelectorProps) {
   return (
     <div className="mb-8">
-      <h3 className="font-['Quicksand'] font-semibold text-xl text-[#333333] mb-4">
-        Your English Level:
+      <h3 className="font-['Quicksand'] font-semibold text-xl text-[#333333] mb-4 flex items-center gap-2">
+        <GraduationCap className="w-5 h-5" />
+        CEFR level
       </h3>
       <div className="level-selector flex flex-wrap justify-center gap-4">
         <div className="relative">
