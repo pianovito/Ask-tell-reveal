@@ -26,7 +26,7 @@ export default function GameHeader({ level, topic, currentStage, stageIndex, tot
   
   return (
     <div className="mb-8">
-      <div className="bg-white rounded-xl shadow-md p-5 border border-gray-100">
+      <div className="bg-gradient-to-r from-blue-100 to-green-100 rounded-xl shadow-md p-5 border border-gray-100">
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="mb-4 md:mb-0 flex items-center">
             {/* Topic icon and name */}
@@ -45,7 +45,7 @@ export default function GameHeader({ level, topic, currentStage, stageIndex, tot
                 <span className={`${colorScheme.bg} ${colorScheme.text} font-semibold py-1 px-3 rounded-full text-sm mr-2`}>
                   {level}
                 </span>
-                <h2 className="font-['Quicksand'] font-bold text-xl">{topic}</h2>
+                <h2 className="font-semibold text-xl text-center">{topic}</h2>
               </div>
             </div>
           </div>
