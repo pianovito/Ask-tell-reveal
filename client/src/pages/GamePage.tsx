@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation, useRoute } from "wouter";
 import { motion } from "framer-motion";
+import AppHeader from "@/components/AppHeader";
 import GameHeader from "@/components/GameHeader";
 import PromptCard from "@/components/PromptCard";
 import HintWords from "@/components/HintWords";

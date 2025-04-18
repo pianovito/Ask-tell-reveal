@@ -2,6 +2,7 @@ import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import AppHeader from "@/components/AppHeader";
 import LevelSelector from "@/components/LevelSelector";
 import TopicSelector from "@/components/TopicSelector";
 import HelpModal from "@/components/HelpModal";
