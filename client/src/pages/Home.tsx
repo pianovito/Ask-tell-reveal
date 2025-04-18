@@ -46,7 +46,7 @@ export default function Home() {
             <span className="text-[#3498db] text-3xl">
               <i className="fas fa-comments"></i>
             </span>
-            <h1 className="font-['Quicksand'] font-bold text-2xl md:text-3xl text-[#333333]">
+            <h1 className="font-['Poppins'] font-bold text-4xl md:text-5xl text-center text-[#333333]">
               <span className="text-[#3498db]">Ask</span>,
               <span className="text-[#f39c12]">Tell</span>,
               <span className="text-[#9b59b6]">Reveal</span>
