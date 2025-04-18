@@ -84,7 +84,7 @@ export default function Home() {
               id="free-mode"
               checked={isFreeMode}
               onCheckedChange={setIsFreeMode}
-              className={isFreeMode ? "data-[state=checked]:bg-[#3498db]" : ""}
+              className="bg-white data-[state=checked]:bg-[#3498db]"
             />
             <Label htmlFor="free-mode" className="cursor-pointer">
               <span className={`font-medium ${isFreeMode ? 'text-[#3498db]' : ''}`}>Free Mode</span>
