@@ -48,6 +48,9 @@ export default function Home() {
               <span className="text-[#f39c12]">Tell</span>, 
               <span className="text-[#9b59b6]">Reveal</span>
             </h1>
+            <p className="text-gray-600 text-sm mt-2 text-center">
+              Ask a question, tell something about, reveal a secret
+            </p>
           </div>
           <button 
             className="text-[#333333] hover:text-[#3498db] transition-colors"
