@@ -31,6 +31,7 @@ export default function GamePage() {
   const topicId = searchParams.get("topic") || "1";
   const customTopic = searchParams.get("customTopic") || "";
   const isFreeMode = searchParams.get("freeMode") === "true";
+  const isRandomMode = searchParams.get("randomMode") === "true";
   
   // Store a randomized sequence of stages (0, 1, 2 shuffled)
   const [stageSequence, setStageSequence] = useState<number[]>([]);
@@ -41,12 +42,35 @@ export default function GamePage() {
   const [promptsCounter, setPromptsCounter] = useState<number>(0); // Counter to force refetch
   const [groupXP, setGroupXP] = useState<number>(0); // Track Group XP
   const [freeKeywords, setFreeKeywords] = useState<string[]>([]); // Keywords for free mode
+  const [randomTopicId, setRandomTopicId] = useState<string>(topicId); // For Random Mode
+  const [allTopics, setAllTopics] = useState<Topic[]>([]); // Store all topics for Random Mode
   const [, navigate] = useLocation();
   const { toast } = useToast();
 
-  // Fetch topic by ID for the header
+  // Fetch all topics for random mode
+  const { data: topicsData, isLoading: isTopicsLoading } = useQuery<Topic[]>({
+    queryKey: ['/api/topics'],
+    enabled: isRandomMode // Only fetch all topics if in random mode
+  });
+
+  // Set all topics when the data is loaded
+  useEffect(() => {
+    if (topicsData && isRandomMode) {
+      setAllTopics(topicsData);
+      
+      // If we have no randomTopicId set or we're initializing, pick a random topic
+      if (randomTopicId === topicId || randomTopicId === "1") {
+        const randomIndex = Math.floor(Math.random() * topicsData.length);
+        const randomId = topicsData[randomIndex].id.toString();
+        setRandomTopicId(randomId);
+        console.log(`Random Mode: Selected random topic ID: ${randomId}`);
+      }
+    }
+  }, [topicsData, isRandomMode, topicId, randomTopicId]);
+
+  // Fetch topic by ID for the header (use randomTopicId in random mode)
   const { data: topic, isLoading: isTopicLoading } = useQuery<Topic>({
-    queryKey: [`/api/topics/${topicId}`]
+    queryKey: [`/api/topics/${isRandomMode ? randomTopicId : topicId}`]
   });
 
   // Continue parameter is set to true when user wants to continue with new prompts
@@ -55,10 +79,11 @@ export default function GamePage() {
   // Fetch prompts based on level and topic
   // Include continue=true parameter when user wants fresh prompts
   // Add freeMode parameter to indicate we're in free mode
+  // For Random Mode, use the randomTopicId
   const { data: promptsData, isLoading: isPromptsLoading, error, refetch } = useQuery<GamePrompts>({
-    queryKey: [`/api/prompts?level=${level}&topicId=${topicId}&counter=${promptsCounter}&continue=${continuePractice}&freeMode=${isFreeMode}`],
-    // Don't fetch prompts in free mode if isFreeMode is true
-    enabled: !isFreeMode
+    queryKey: [`/api/prompts?level=${level}&topicId=${isRandomMode ? randomTopicId : topicId}&counter=${promptsCounter}&continue=${continuePractice}&freeMode=${isFreeMode}`],
+    // Don't fetch prompts in free mode or if we're in random mode but don't have a topic yet
+    enabled: !isFreeMode && (!isRandomMode || (isRandomMode && randomTopicId !== topicId))
   });
 
   // Initialize or refresh stage sequence when prompts data is loaded or when requesting new prompts
@@ -94,14 +119,17 @@ export default function GamePage() {
       level, 
       topicId, 
       topic,
+      isRandomMode,
+      randomTopicId,
+      allTopics: allTopics.length,
       promptsData,
       stageSequence,
       currentStageIndex,
       currentStage: stageSequence[currentStageIndex],
-      isLoading: { topic: isTopicLoading, prompts: isPromptsLoading },
+      isLoading: { topic: isTopicLoading, topics: isTopicsLoading, prompts: isPromptsLoading },
       error
     });
-  }, [level, topicId, topic, promptsData, stageSequence, currentStageIndex, isTopicLoading, isPromptsLoading, error]);
+  }, [level, topicId, topic, isRandomMode, randomTopicId, allTopics.length, promptsData, stageSequence, currentStageIndex, isTopicLoading, isTopicsLoading, isPromptsLoading, error]);
 
   const handleNext = useCallback(() => {
     if (currentStageIndex < stageSequence.length - 1) {
@@ -142,6 +170,30 @@ export default function GamePage() {
       setWantNewPrompts(false);
       console.log("Free Mode: Continuing with new randomized sequence");
       return;
+    }
+    
+    // In random mode, switch to a new random topic before continuing
+    if (isRandomMode && allTopics.length > 1) {
+      // Filter out current topic ID to avoid repeating
+      const availableTopics = allTopics.filter(t => t.id.toString() !== randomTopicId);
+      
+      if (availableTopics.length > 0) {
+        // Select a random topic from available ones
+        const randomIndex = Math.floor(Math.random() * availableTopics.length);
+        const newRandomTopicId = availableTopics[randomIndex].id.toString();
+        
+        // Update the random topic ID
+        setRandomTopicId(newRandomTopicId);
+        
+        // Show toast notification
+        toast({
+          title: "Topic Changed",
+          description: `New topic: ${availableTopics[randomIndex].name}`,
+          variant: "default"
+        });
+        
+        console.log(`Random Mode: Switching to new topic ID: ${newRandomTopicId}`);
+      }
     }
     
     // In normal mode with prompts:
@@ -215,8 +267,8 @@ export default function GamePage() {
     return promptsData.stages[stageIndex];
   };
 
-  // Only show loading when we're fetching topic or (prompts and not in free mode)
-  if (isTopicLoading || (!isFreeMode && isPromptsLoading)) {
+  // Only show loading when we're fetching topic, topics list (for random mode), or (prompts and not in free mode)
+  if (isTopicLoading || (isRandomMode && isTopicsLoading) || (!isFreeMode && isPromptsLoading)) {
     return (
       <div className="bg-[#f5f7fa] min-h-screen font-['Nunito']">
         <header className="bg-white shadow-md">
