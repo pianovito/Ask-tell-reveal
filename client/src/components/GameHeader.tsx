@@ -14,8 +14,7 @@ interface GameHeaderProps {
 const stageColors = {
   "Ask": { bg: "bg-[#3498db]/10", text: "text-[#3498db]", border: "border-[#3498db]", progress: "from-[#3498db]/50 to-[#3498db]" },
   "Tell": { bg: "bg-[#f39c12]/10", text: "text-[#f39c12]", border: "border-[#f39c12]", progress: "from-[#f39c12]/50 to-[#f39c12]" },
-  "Reveal": { bg: "bg-[#9b59b6]/10", text: "text-[#9b59b6]", border: "border-[#9b59b6]", progress: "from-[#9b59b6]/50 to-[#9b59b6]" },
-  "Your Class": { bg: "bg-[#2ecc71]/10", text: "text-[#2ecc71]", border: "border-[#2ecc71]", progress: "from-[#2ecc71]/50 to-[#2ecc71]" }
+  "Reveal": { bg: "bg-[#9b59b6]/10", text: "text-[#9b59b6]", border: "border-[#9b59b6]", progress: "from-[#9b59b6]/50 to-[#9b59b6]" }
 };
 
 export default function GameHeader({ level, topic, currentStage, stageIndex, totalStages }: GameHeaderProps) {
@@ -62,8 +61,7 @@ export default function GameHeader({ level, topic, currentStage, stageIndex, tot
             <div className="w-32">
               <Progress 
                 value={progressPercent} 
-                className="h-2 bg-gray-100"
-                indicatorClassName={`bg-gradient-to-r ${colorScheme.progress}`}
+                className={`h-2 bg-gray-100 [&>div]:bg-gradient-to-r ${colorScheme.progress}`}
               />
             </div>
           </div>
@@ -75,8 +73,7 @@ export default function GameHeader({ level, topic, currentStage, stageIndex, tot
             const isActive = currentStage === stage;
             const isPast = 
               (currentStage === "Tell" && stage === "Ask") || 
-              (currentStage === "Reveal" && (stage === "Ask" || stage === "Tell")) ||
-              (currentStage === "Your Class" && (stage === "Ask" || stage === "Tell" || stage === "Reveal"));
+              (currentStage === "Reveal" && (stage === "Ask" || stage === "Tell"));
 
             return (
               <motion.div
@@ -93,7 +90,7 @@ export default function GameHeader({ level, topic, currentStage, stageIndex, tot
                   <i className={`fas ${
                     stage === "Ask" ? "fa-question" : 
                     stage === "Tell" ? "fa-comment" : 
-                    stage === "Reveal" ? "fa-star" : "fa-users"
+                    "fa-star" // For Reveal
                   } text-sm ${isActive ? stageColors[stage as keyof typeof stageColors].text : "text-gray-400"}`}></i>
                 </div>
                 <span className={`text-xs font-medium ${
