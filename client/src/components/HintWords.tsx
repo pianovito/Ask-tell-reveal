@@ -28,14 +28,14 @@ export default function HintWords({ words }: HintWordsProps) {
         <span className="text-xs text-gray-500">(Use these in your answer)</span>
       </div>
       
-      <div className="flex flex-wrap gap-2">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
         {words.map((word, index) => {
           const colorIndex = index % hintColors.length;
           
           return (
             <motion.span
               key={index}
-              className={`${hintColors[colorIndex].bg} ${hintColors[colorIndex].text} px-3 py-1 rounded-full text-sm`}
+              className={`${hintColors[colorIndex].bg} ${hintColors[colorIndex].text} px-4 py-3 rounded-xl text-center text-base font-medium w-full`}
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1, duration: 0.3 }}
