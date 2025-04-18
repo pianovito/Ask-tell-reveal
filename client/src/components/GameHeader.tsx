@@ -14,16 +14,17 @@ interface GameHeaderProps {
 const stageColors = {
   "Ask": { bg: "bg-[#3498db]/10", text: "text-[#3498db]", border: "border-[#3498db]", progress: "from-[#3498db]/50 to-[#3498db]" },
   "Tell": { bg: "bg-[#f39c12]/10", text: "text-[#f39c12]", border: "border-[#f39c12]", progress: "from-[#f39c12]/50 to-[#f39c12]" },
-  "Reveal": { bg: "bg-[#9b59b6]/10", text: "text-[#9b59b6]", border: "border-[#9b59b6]", progress: "from-[#9b59b6]/50 to-[#9b59b6]" }
+  "Reveal": { bg: "bg-[#9b59b6]/10", text: "text-[#9b59b6]", border: "border-[#9b59b6]", progress: "from-[#9b59b6]/50 to-[#9b59b6]" },
+  "Your Class": { bg: "bg-[#2ecc71]/10", text: "text-[#2ecc71]", border: "border-[#2ecc71]", progress: "from-[#2ecc71]/50 to-[#2ecc71]" }
 };
 
 export default function GameHeader({ level, topic, currentStage, stageIndex, totalStages }: GameHeaderProps) {
   // Get the color scheme for the current stage
   const colorScheme = stageColors[currentStage as keyof typeof stageColors] || stageColors["Ask"];
-  
+
   // Calculate progress percentage
   const progressPercent = ((stageIndex + 1) / totalStages) * 100;
-  
+
   return (
     <div className="mb-8">
       <div className="bg-white rounded-xl shadow-md p-5 border border-gray-100">
@@ -35,7 +36,7 @@ export default function GameHeader({ level, topic, currentStage, stageIndex, tot
                 <i className="fas fa-comment-dots text-lg"></i>
               </div>
             </div>
-            
+
             <div>
               <div className="text-sm text-gray-500 mb-1 flex items-center">
                 <i className="fas fa-graduation-cap mr-1 text-[#34495e]"></i>
@@ -49,14 +50,14 @@ export default function GameHeader({ level, topic, currentStage, stageIndex, tot
               </div>
             </div>
           </div>
-          
+
           {/* Current Stage Indicator */}
           <div className="flex flex-col items-center">
             <div className="text-center mb-2">
               <span className={`font-bold text-lg ${colorScheme.text}`}>{currentStage}</span>
               <span className="text-sm text-gray-500 ml-2">({stageIndex + 1}/{totalStages})</span>
             </div>
-            
+
             {/* Progress Bar */}
             <div className="w-32">
               <Progress 
@@ -67,15 +68,16 @@ export default function GameHeader({ level, topic, currentStage, stageIndex, tot
             </div>
           </div>
         </div>
-        
+
         {/* Stage Icons */}
         <div className="flex justify-center mt-4 pt-4 border-t border-gray-100">
           {Object.keys(stageColors).map((stage, index) => {
             const isActive = currentStage === stage;
             const isPast = 
               (currentStage === "Tell" && stage === "Ask") || 
-              (currentStage === "Reveal" && (stage === "Ask" || stage === "Tell"));
-            
+              (currentStage === "Reveal" && (stage === "Ask" || stage === "Tell")) ||
+              (currentStage === "Your Class" && (stage === "Ask" || stage === "Tell" || stage === "Reveal"));
+
             return (
               <motion.div
                 key={stage}
@@ -90,7 +92,8 @@ export default function GameHeader({ level, topic, currentStage, stageIndex, tot
                 }>
                   <i className={`fas ${
                     stage === "Ask" ? "fa-question" : 
-                    stage === "Tell" ? "fa-comment" : "fa-star"
+                    stage === "Tell" ? "fa-comment" : 
+                    stage === "Reveal" ? "fa-star" : "fa-users"
                   } text-sm ${isActive ? stageColors[stage as keyof typeof stageColors].text : "text-gray-400"}`}></i>
                 </div>
                 <span className={`text-xs font-medium ${

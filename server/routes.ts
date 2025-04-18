@@ -135,10 +135,16 @@ async function initializeTopics() {
   if (topics.length === 0) {
     const defaultTopics = [
       {
+        name: "Your Class",
+        description: "School & classmates",
+        icon: "fa-graduation-cap",
+        colorClass: "primary"
+      },
+      {
         name: "Childhood",
         description: "Memories & experiences",
         icon: "fa-child",
-        colorClass: "primary"
+        colorClass: "secondary"
       },
       {
         name: "Travel",
