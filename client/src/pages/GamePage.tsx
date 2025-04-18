@@ -196,6 +196,16 @@ export default function GamePage() {
       randomWords.push(shuffledWords[i]);
     }
     
+    // Set the new keywords in state
+    setFreeKeywords(randomWords);
+    
+    // Show confirmation toast
+    toast({
+      title: "Keywords Generated",
+      description: "New keywords have been generated for your topic",
+      variant: "default",
+    });
+    
     return randomWords;
   };
 
@@ -396,6 +406,24 @@ export default function GamePage() {
                     </div>
                   </div>
                 
+                  {/* Keywords generator button for Free Mode */}
+                  <div className="mt-6 mb-6">
+                    <Button
+                      onClick={generateRandomKeywords}
+                      className="bg-[#9b59b6] hover:bg-[#9b59b6]/90 text-white font-semibold px-6 py-2 rounded-full mx-auto flex items-center"
+                    >
+                      <i className="fas fa-magic mr-2"></i> Generate Keywords
+                    </Button>
+                  </div>
+                  
+                  {/* Display keywords if available */}
+                  {freeKeywords.length > 0 && (
+                    <HintWords 
+                      words={freeKeywords}
+                      onKeywordClick={handleKeywordClick}
+                    />
+                  )}
+                
                   <div className="flex justify-end mt-6">
                     <Button
                       onClick={handleNext}
@@ -420,6 +448,7 @@ export default function GamePage() {
 
                   <HintWords 
                     words={currentPrompt.hintWords}
+                    onKeywordClick={handleKeywordClick}
                   />
                 
                   <div className="flex justify-end mt-6">
