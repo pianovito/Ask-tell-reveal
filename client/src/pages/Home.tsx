@@ -40,31 +40,21 @@ export default function Home() {
   return (
     <div className="bg-[#f5f7fa] min-h-screen font-['Nunito']">
       {/* Header */}
-      <header className="bg-white shadow-md">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <div className="bg-gradient-to-r from-blue-100 to-green-100 p-4 md:p-6 rounded-xl shadow-sm w-full md:w-auto">
-              <h1 className="font-['Poppins'] font-bold text-3xl sm:text-4xl md:text-5xl text-center text-[#333333]">
-                <span className="text-[#3498db]"><i className="fas fa-comments text-3xl mr-2"></i>Ask</span>,
-                <span className="text-[#f39c12]">Tell</span>, 
-                <span className="text-[#9b59b6]">Reveal</span>
-              </h1>
-            </div>
+      <header className="bg-gradient-to-r from-blue-100 to-green-100 shadow-md">
+        <div className="container mx-auto px-4 py-6 flex justify-between items-center">
+          <div className="flex-1">
+            <h1 className="font-['Poppins'] font-bold text-3xl sm:text-4xl md:text-5xl text-center text-[#333333]">
+              <span className="text-[#3498db]"><i className="fas fa-comments text-3xl mr-2"></i>Ask</span>,
+              <span className="text-[#f39c12]">Tell</span>, 
+              <span className="text-[#9b59b6]">Reveal</span>
+            </h1>
           </div>
-          <div className="flex items-center space-x-4">
-            <button 
-              className="text-[#333333] hover:text-[#3498db] transition-colors"
-              onClick={() => setShowHelpModal(true)}
-            >
-              <i className="fas fa-question-circle text-xl"></i>
-            </button>
-            <button 
-              className="text-[#333333] hover:text-[#3498db] transition-colors"
-              onClick={() => setShowSettingsModal(true)}
-            >
-              <i className="fas fa-cog text-xl"></i>
-            </button>
-          </div>
+          <button 
+            className="text-[#333333] hover:text-[#3498db] transition-colors"
+            onClick={() => setShowHelpModal(true)}
+          >
+            <i className="fas fa-question-circle text-xl"></i>
+          </button>
         </div>
       </header>
 
