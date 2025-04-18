@@ -46,11 +46,13 @@ export default function Home() {
             <span className="text-[#3498db] text-3xl">
               <i className="fas fa-comments"></i>
             </span>
-            <h1 className="font-['Poppins'] font-bold text-4xl md:text-5xl text-center text-[#333333]">
-              <span className="text-[#3498db]">Ask</span>,
-              <span className="text-[#f39c12]">Tell</span>,
-              <span className="text-[#9b59b6]">Reveal</span>
-            </h1>
+            <div className="bg-gradient-to-r from-blue-100 to-green-100 p-6 rounded-xl shadow-sm">
+              <h1 className="font-['Poppins'] font-bold text-4xl md:text-5xl text-center text-[#333333]">
+                <span className="text-[#3498db]">Ask</span>,
+                <span className="text-[#f39c12]">Tell</span>, 
+                <span className="text-[#9b59b6]">Reveal</span>
+              </h1>
+            </div>
           </div>
           <div className="flex items-center space-x-4">
             <button 
