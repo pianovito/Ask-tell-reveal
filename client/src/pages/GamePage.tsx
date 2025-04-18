@@ -259,37 +259,7 @@ export default function GamePage() {
 
   return (
     <div className="bg-gradient-to-b from-[#ecf0f1] to-[#e0f2e9] min-h-screen font-['Nunito']">
-      {/* Header */}
-      <header className="bg-white shadow-md">
-        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-          <div className="flex items-center space-x-2">
-            <span className="text-[#3498db] text-3xl">
-              <i className="fas fa-comments animate-pulse-glow"></i>
-            </span>
-            <h1 className="font-['Quicksand'] font-bold text-2xl md:text-3xl text-[#34495e]">
-              <span className="text-[#3498db]">Ask</span>,
-              <span className="text-[#f39c12]">Tell</span>,
-              <span className="text-[#9b59b6]">Reveal</span>
-            </h1>
-          </div>
-          <div className="flex items-center space-x-4">
-            <button 
-              className="text-[#34495e] hover:text-[#3498db] transition-colors"
-              onClick={() => navigate("/")}
-              title="Back to Home"
-            >
-              <i className="fas fa-home text-xl"></i>
-            </button>
-            <button 
-              className="text-[#34495e] hover:text-[#3498db] transition-colors"
-              onClick={() => setShowHelpModal(true)}
-              title="Help"
-            >
-              <i className="fas fa-question-circle text-xl"></i>
-            </button>
-          </div>
-        </div>
-      </header>
+      <AppHeader onHelpClick={() => setShowHelpModal(true)} />
       
       {/* Group Achievements Panel */}
       <GroupAchievements topicId={topicId} level={level} />
