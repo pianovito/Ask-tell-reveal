@@ -15,6 +15,7 @@ export default function Home() {
   const [showHelpModal, setShowHelpModal] = useState(false);
   const [customTopic, setCustomTopic] = useState("");
   const [isFreeMode, setIsFreeMode] = useState(false);
+  const [isRandomMode, setIsRandomMode] = useState(false);
   const [_, navigate] = useLocation();
   const { toast } = useToast();
 
@@ -35,11 +36,31 @@ export default function Home() {
 
   // Log state changes for debugging
   useEffect(() => {
-    console.log("Home state:", { selectedLevel, selectedTopic, isFreeMode, customTopic });
-  }, [selectedLevel, selectedTopic, isFreeMode, customTopic]);
+    console.log("Home state:", { selectedLevel, selectedTopic, isFreeMode, isRandomMode, customTopic });
+  }, [selectedLevel, selectedTopic, isFreeMode, isRandomMode, customTopic]);
+  
+  // Toggle handlers
+  const toggleFreeMode = () => {
+    if (isRandomMode) {
+      setIsRandomMode(false);
+    }
+    setIsFreeMode(!isFreeMode);
+  };
+  
+  const toggleRandomMode = () => {
+    if (isFreeMode) {
+      setIsFreeMode(false);
+    }
+    setIsRandomMode(!isRandomMode);
+  };
 
   const handleStartGame = () => {
-    if (isFreeMode && customTopic) {
+    if (isRandomMode) {
+      // Random mode: uses all topics in a random order
+      const url = `/game?level=${selectedLevel}&randomMode=true`;
+      console.log("Navigating to random mode:", url);
+      navigate(url);
+    } else if (isFreeMode && customTopic) {
       // Use the custom topic in free mode
       const url = `/game?level=${selectedLevel}&customTopic=${encodeURIComponent(customTopic)}&freeMode=${isFreeMode}`;
       console.log("Navigating to free mode with custom topic:", url);
@@ -83,7 +104,7 @@ export default function Home() {
           <div className={`mt-6 p-4 rounded-lg shadow-sm bg-white ${isFreeMode ? 'bg-blue-50 border border-blue-200' : ''} transition-colors`}>
             <div className="flex items-center justify-center space-x-2 mb-3">
               <Button
-                onClick={() => setIsFreeMode(!isFreeMode)}
+                onClick={toggleFreeMode}
                 className={`min-w-[70px] ${isFreeMode ? 'bg-[#3498db] hover:bg-[#3498db]/90' : 'bg-gray-200 hover:bg-gray-300'}`}
               >
                 {isFreeMode ? 'ON' : 'OFF'}
@@ -126,11 +147,29 @@ export default function Home() {
             )}
           </div>
 
+          {/* Random Mode Toggle */}
+          <div className={`mt-6 p-4 rounded-lg shadow-sm bg-white ${isRandomMode ? 'bg-purple-50 border border-purple-200' : ''} transition-colors`}>
+            <div className="flex items-center justify-center space-x-2 mb-3">
+              <Button
+                onClick={toggleRandomMode}
+                className={`min-w-[70px] ${isRandomMode ? 'bg-[#9b59b6] hover:bg-[#9b59b6]/90' : 'bg-gray-200 hover:bg-gray-300'}`}
+              >
+                {isRandomMode ? 'ON' : 'OFF'}
+              </Button>
+              <Label className="cursor-pointer">
+                <span className={`font-medium ${isRandomMode ? 'text-[#9b59b6]' : ''}`}>Random Mode</span>
+                <p className="text-sm text-gray-500 mt-1">
+                  Practice with random topics selected for you (cycles through all conversation topics)
+                </p>
+              </Label>
+            </div>
+          </div>
+
           {/* Start Button */}
           <div className="mt-8 text-center">
             <Button
               onClick={handleStartGame}
-              disabled={!(isFreeMode && customTopic) && !selectedTopic}
+              disabled={!isRandomMode && !(isFreeMode && customTopic) && !selectedTopic}
               className="bg-[#3498db] hover:bg-[#3498db]/90 text-white font-bold text-lg py-4 px-10 rounded-full transition-colors shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <i className="fas fa-play mr-2"></i> Start Game
