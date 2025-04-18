@@ -72,14 +72,7 @@ export default function Home() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8">
-            <h2 className="font-['Quicksand'] font-bold text-2xl md:text-3xl text-[#333333] mb-2">
-              Let's Practice Speaking!
-            </h2>
-            <p className="text-gray-600 max-w-lg mx-auto">
-              Choose your English level and a conversation topic to get started with personalized speaking prompts.
-            </p>
-          </div>
+          
 
           {/* Level Selector */}
           <LevelSelector 
