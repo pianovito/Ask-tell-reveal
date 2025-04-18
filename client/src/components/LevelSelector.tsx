@@ -13,7 +13,7 @@ export default function LevelSelector({ selectedLevel, onLevelChange }: LevelSel
         <BarChart className="w-5 h-5" />
         CEFR level:
       </h3>
-      <div className="level-selector flex flex-wrap justify-center gap-4">
+      <div className="level-selector flex overflow-x-auto pb-4 gap-2 items-center">
         {[
           { level: "B1", label: "Intermediate" },
           { level: "B1+", label: "Upper Intermediate" },
@@ -34,7 +34,7 @@ export default function LevelSelector({ selectedLevel, onLevelChange }: LevelSel
             />
             <label 
               htmlFor={`level-${level.toLowerCase().replace('+', 'plus')}`}
-              className={`flex flex-col items-center px-6 py-4 border-2 rounded-xl cursor-pointer transition-colors ${
+              className={`flex flex-col items-center px-4 py-2 border-2 rounded-xl cursor-pointer transition-colors whitespace-nowrap min-w-[100px] ${
                 selectedLevel === level
                   ? "border-[#3498db] bg-[#3498db] text-white" 
                   : "border-gray-300 hover:border-[#3498db]"
