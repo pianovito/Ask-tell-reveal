@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import LevelSelector from "@/components/LevelSelector";
 import TopicSelector from "@/components/TopicSelector";
@@ -64,7 +63,7 @@ export default function Home() {
       {/* Main Content */}
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          
+
 
           {/* Level Selector */}
           <LevelSelector 
@@ -80,13 +79,13 @@ export default function Home() {
 
           {/* Free Mode Toggle */}
           <div className={`mt-6 flex items-center justify-center space-x-2 p-4 rounded-lg shadow-sm bg-white ${isFreeMode ? 'bg-blue-50 border border-blue-200' : ''} transition-colors`}>
-            <Switch 
-              id="free-mode"
-              checked={isFreeMode}
-              onCheckedChange={setIsFreeMode}
-              className="bg-gray-200 data-[state=checked]:bg-[#3498db] border-2 border-gray-300 data-[state=checked]:border-[#3498db]"
-            />
-            <Label htmlFor="free-mode" className="cursor-pointer">
+            <Button
+              onClick={() => setIsFreeMode(!isFreeMode)}
+              className={`min-w-[70px] ${isFreeMode ? 'bg-[#3498db] hover:bg-[#3498db]/90' : 'bg-gray-200 hover:bg-gray-300'}`}
+            >
+              {isFreeMode ? 'ON' : 'OFF'}
+            </Button>
+            <Label className="cursor-pointer">
               <span className={`font-medium ${isFreeMode ? 'text-[#3498db]' : ''}`}>Free Mode</span>
               <p className="text-sm text-gray-500 mt-1">
                 Practice with only the topic and randomized activity types (without specific prompts)
