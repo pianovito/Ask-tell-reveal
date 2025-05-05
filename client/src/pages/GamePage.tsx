@@ -77,13 +77,6 @@ export default function GamePage() {
     setGameStats(prev => {
       const newScore = prev.score + update.points;
       localStorage.setItem('score', newScore.toString());
-
-      toast({
-        title: `+${update.points} points!`,
-        description: update.reason,
-        variant: "default"
-      });
-
       return {
         ...prev,
         score: newScore
