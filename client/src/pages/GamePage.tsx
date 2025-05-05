@@ -407,6 +407,13 @@ export default function GamePage() {
     // Add 1 XP per keyword clicked and store the new value in a variable
     const newXP = groupXP + 1;
     setGroupXP(newXP); 
+    
+    // Dispatch custom event for XP update to ensure it's reflected everywhere
+    const event = new CustomEvent('xpUpdated', { 
+      detail: { xp: newXP } 
+    });
+    window.dispatchEvent(event);
+    
     console.log(`Keyword clicked: ${word}, +1 XP added. Total: ${newXP}`);
     
     // Add a visual indication for debugging

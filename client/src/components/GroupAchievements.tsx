@@ -16,24 +16,69 @@ export default function GroupAchievements({ topicId, level }: GroupAchievementsP
     achievements: [...defaultAchievements]
   });
 
-  // Connect to the game's XP system instead of using a timer
+  // Setup local storage for persistent progress
+  useEffect(() => {
+    // Try to load saved game stats from localStorage
+    const savedStats = localStorage.getItem('groupAchievements');
+    if (savedStats) {
+      try {
+        const parsed = JSON.parse(savedStats);
+        setGameStats(parsed);
+      } catch (e) {
+        console.error("Error loading saved achievements:", e);
+      }
+    }
+  }, []);
+  
   // We'll store a map of previously seen topics to track Topic Explorer achievement
   const [visitedTopics, setVisitedTopics] = useState<Set<string>>(new Set());
   
-  // Update visited topics when topicId changes
+  // Update visited topics when topicId changes and update localStorage
   useEffect(() => {
     if (topicId) {
-      setVisitedTopics(prev => {
-        const newSet = new Set(prev);
-        newSet.add(topicId.toString());
-        return newSet;
+      // Convert to array, update, then back to set to avoid iteration issues
+      const currentTopics = Array.from(visitedTopics);
+      if (!currentTopics.includes(topicId.toString())) {
+        currentTopics.push(topicId.toString());
+        setVisitedTopics(new Set(currentTopics));
+      }
+      
+      // Update Topic Explorer achievement
+      setGameStats(prev => {
+        const updatedAchievements = [...prev.achievements];
+        const topicExplorerIndex = updatedAchievements.findIndex(a => a.id === "topic_explorer");
+        
+        if (topicExplorerIndex >= 0 && updatedAchievements[topicExplorerIndex].progress !== undefined) {
+          // Get the count of unique topics
+          const uniqueTopicsCount = new Set([...currentTopics, topicId.toString()]).size;
+          
+          // Update progress to match the number of unique topics visited
+          const newProgress = Math.min(uniqueTopicsCount, updatedAchievements[topicExplorerIndex].maxProgress!);
+          updatedAchievements[topicExplorerIndex].progress = newProgress;
+          
+          // Check if completed
+          if (newProgress >= updatedAchievements[topicExplorerIndex].maxProgress!) {
+            updatedAchievements[topicExplorerIndex].isUnlocked = true;
+          }
+        }
+        
+        const newStats = {
+          ...prev,
+          achievements: updatedAchievements
+        };
+        
+        // Save to localStorage
+        localStorage.setItem('groupAchievements', JSON.stringify(newStats));
+        
+        return newStats;
       });
     }
-  }, [topicId]);
+  }, [topicId, visitedTopics]);
   
-  // Track Next button clicks for Vocabulary Master achievement
+  // Listen for two types of events: Next button clicks and keyword clicks
   useEffect(() => {
-    const handleCustomEvent = (e: CustomEvent) => {
+    // Handle Next button clicks for Vocabulary Master achievement
+    const handleNextButtonEvent = (e: CustomEvent) => {
       // Update Vocabulary Master progress
       setGameStats(prev => {
         const updatedAchievements = [...prev.achievements];
@@ -51,47 +96,43 @@ export default function GroupAchievements({ topicId, level }: GroupAchievementsP
           }
         }
         
-        return {
+        const newStats = {
           ...prev,
           achievements: updatedAchievements,
           groupXP: e.detail?.xp || prev.groupXP // Update XP if provided in the event
         };
+        
+        // Save to localStorage
+        localStorage.setItem('groupAchievements', JSON.stringify(newStats));
+        
+        return newStats;
       });
     };
     
-    // Listen for Next button clicks
-    window.addEventListener('nextButtonClicked' as any, handleCustomEvent);
+    // Handle XP updates from keyword clicks
+    const handleXpUpdateEvent = (e: CustomEvent) => {
+      setGameStats(prev => {
+        const newStats = {
+          ...prev,
+          groupXP: e.detail?.xp || prev.groupXP
+        };
+        
+        // Save to localStorage
+        localStorage.setItem('groupAchievements', JSON.stringify(newStats));
+        
+        return newStats;
+      });
+    };
+    
+    // Listen for both events
+    window.addEventListener('nextButtonClicked' as any, handleNextButtonEvent);
+    window.addEventListener('xpUpdated' as any, handleXpUpdateEvent);
     
     return () => {
-      window.removeEventListener('nextButtonClicked' as any, handleCustomEvent);
+      window.removeEventListener('nextButtonClicked' as any, handleNextButtonEvent);
+      window.removeEventListener('xpUpdated' as any, handleXpUpdateEvent);
     };
   }, []);
-  
-  // Update Topic Explorer achievement when visitedTopics changes
-  useEffect(() => {
-    if (visitedTopics.size > 0) {
-      setGameStats(prev => {
-        const updatedAchievements = [...prev.achievements];
-        const topicExplorerIndex = updatedAchievements.findIndex(a => a.id === "topic_explorer");
-        
-        if (topicExplorerIndex >= 0 && updatedAchievements[topicExplorerIndex].progress !== undefined) {
-          // Update progress to match the number of unique topics visited
-          const newProgress = Math.min(visitedTopics.size, updatedAchievements[topicExplorerIndex].maxProgress!);
-          updatedAchievements[topicExplorerIndex].progress = newProgress;
-          
-          // Check if completed
-          if (newProgress >= updatedAchievements[topicExplorerIndex].maxProgress!) {
-            updatedAchievements[topicExplorerIndex].isUnlocked = true;
-          }
-        }
-        
-        return {
-          ...prev,
-          achievements: updatedAchievements
-        };
-      });
-    }
-  }, [visitedTopics]);
 
   return (
     <div className="fixed bottom-4 right-4 z-50">
