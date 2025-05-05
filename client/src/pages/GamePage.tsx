@@ -509,13 +509,10 @@ export default function GamePage() {
     
     console.log(`Keyword clicked: ${word}, +1 XP added. Total: ${newXP}`);
     
-    // Calculate the total score (5 base for question + keywords)
-    const totalScore = 5 + newKeywordsUsed;
-    
-    // Show toast notification with more detailed information
+    // Show toast notification
     toast({
-      title: `+1 XP for keyword: "${word}"`,
-      description: `Total score: ${totalScore} (5 base + ${newKeywordsUsed} keywords)`,
+      title: `+1 XP (Total: ${newXP})`,
+      description: `Used keyword: "${word}"`,
       variant: "default",
     });
   };
@@ -857,8 +854,23 @@ export default function GamePage() {
                   <PromptCard 
                     prompt={currentPrompt}
                     isLoading={false}
-                    score={5 + keywordsUsed} // Total score = 5 for prompt + keywords clicked
+                    score={5} // Static score of 5 for each prompt
                   />
+                  
+                  {/* Keyword XP Counter */}
+                  {keywordsUsed > 0 && (
+                    <div className="flex justify-end mb-2">
+                      <motion.div
+                        initial={{ scale: 0.8 }}
+                        animate={{ scale: 1.1 }}
+                        transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
+                      >
+                        <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#e74c3c] text-white font-bold shadow-md">
+                          +{keywordsUsed}
+                        </div>
+                      </motion.div>
+                    </div>
+                  )}
 
                   <HintWords 
                     words={currentPrompt.hintWords}

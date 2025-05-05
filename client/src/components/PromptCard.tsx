@@ -81,7 +81,7 @@ export default function PromptCard({ prompt, isLoading, score = 5 }: PromptCardP
           transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
         >
           <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#2ecc71] text-white font-bold shadow-md">
-            +{score}
+            +5
           </div>
         </motion.div>
       </div>
