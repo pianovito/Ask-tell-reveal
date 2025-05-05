@@ -22,7 +22,7 @@ const stageBgColors = {
   "Reveal": "bg-[#9b59b6]/10"
 };
 
-export default function PromptCard({ prompt, isLoading }: PromptCardProps) {
+export default function PromptCard({ prompt, isLoading, score = 5 }: PromptCardProps) {
   // Random vocabulary challenge with 50% chance if not already set
   const [vocabularyChallenge, setVocabularyChallenge] = useState<string | undefined>(prompt.vocabularyChallenge);
   
@@ -80,9 +80,9 @@ export default function PromptCard({ prompt, isLoading }: PromptCardProps) {
           animate={{ scale: 1.1 }}
           transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
         >
-          <Badge variant="secondary" className="bg-[#2ecc71]/20 text-[#2ecc71] hover:bg-[#2ecc71]/30 text-sm">
-            <i className="fas fa-star mr-1 text-xs"></i> +5 XP
-          </Badge>
+          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#e74c3c] text-white font-bold shadow-md">
+            +{score}
+          </div>
         </motion.div>
       </div>
       

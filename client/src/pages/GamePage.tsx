@@ -308,25 +308,32 @@ export default function GamePage() {
     const updatedAchievements = [...achievements];
     
     // Update Topic Explorer achievement (based on rounds completed)
-    const topicExplorerAchievement = updatedAchievements.find(a => a.id === "topic-explorer");
+    const topicExplorerAchievement = updatedAchievements.find(a => a.id === "topic_explorer");
     if (topicExplorerAchievement) {
       topicExplorerAchievement.progress = roundsCompleted;
-      if (roundsCompleted >= (topicExplorerAchievement.maxProgress || 5)) {
+      if (roundsCompleted >= (topicExplorerAchievement.maxProgress || 3)) {
         topicExplorerAchievement.isUnlocked = true;
       }
     }
     
     // Update Vocabulary Master achievement (based on keywords used)
-    const vocabularyMasterAchievement = updatedAchievements.find(a => a.id === "vocabulary-master");
+    const vocabularyMasterAchievement = updatedAchievements.find(a => a.id === "vocabulary_master");
     if (vocabularyMasterAchievement) {
       vocabularyMasterAchievement.progress = keywordsUsed;
-      if (keywordsUsed >= (vocabularyMasterAchievement.maxProgress || 10)) {
+      if (keywordsUsed >= (vocabularyMasterAchievement.maxProgress || 5)) {
         vocabularyMasterAchievement.isUnlocked = true;
       }
     }
     
+    // Save achievement progress to localStorage
+    localStorage.setItem('keywordsUsed', keywordsUsed.toString());
+    localStorage.setItem('groupXP', groupXP.toString());
+    localStorage.setItem('roundsCompleted', roundsCompleted.toString());
+    
     setAchievements(updatedAchievements);
     setShowSummary(true);
+    
+    console.log("End activity - Achievements updated:", updatedAchievements);
   };
 
   // Save game results to database
@@ -474,13 +481,37 @@ export default function GamePage() {
     const newKeywordsUsed = keywordsUsed + 1;
     setKeywordsUsed(newKeywordsUsed);
     
+    // Update Vocabulary Master achievement in real-time
+    const updatedAchievements = [...achievements];
+    const vocabularyMasterAchievement = updatedAchievements.find(a => a.id === "vocabulary_master");
+    if (vocabularyMasterAchievement) {
+      vocabularyMasterAchievement.progress = newKeywordsUsed;
+      if (newKeywordsUsed >= (vocabularyMasterAchievement.maxProgress || 5)) {
+        vocabularyMasterAchievement.isUnlocked = true;
+        
+        // Show toast for achievement unlocked
+        if (!vocabularyMasterAchievement.isUnlocked) {
+          toast({
+            title: "Achievement Unlocked!",
+            description: "Vocabulary Master: Used 5 vocabulary keywords",
+            variant: "default",
+          });
+        }
+      }
+    }
+    setAchievements(updatedAchievements);
+    
     // Dispatch custom event for XP update to ensure it's reflected everywhere
     const event = new CustomEvent('xpUpdated', { 
       detail: { xp: newXP } 
     });
     window.dispatchEvent(event);
     
-    console.log(`Keyword clicked: ${word}, +1 XP added. Total: ${newXP}`);
+    console.log(`Keyword clicked: ${word}, +1 XP added. Total: ${newXP}, Keywords used: ${newKeywordsUsed}`);
+    
+    // Save achievement progress to localStorage
+    localStorage.setItem('keywordsUsed', newKeywordsUsed.toString());
+    localStorage.setItem('groupXP', newXP.toString());
     
     // Add a visual indication for debugging
     toast({
@@ -827,6 +858,7 @@ export default function GamePage() {
                   <PromptCard 
                     prompt={currentPrompt}
                     isLoading={false}
+                    score={5} // Static score of 5 for each prompt
                   />
 
                   <HintWords 
