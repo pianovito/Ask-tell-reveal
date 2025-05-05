@@ -35,22 +35,36 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  // Generate prompts based on level and topic
+  // Generate prompts based on level and topic (or custom topic in Free Mode)
   app.get("/api/prompts", async (req, res) => {
     try {
-      const { level, topicId } = req.query;
+      const { level, topicId, customTopic, freeMode } = req.query;
       
       if (!level || !topicId) {
         return res.status(400).json({ message: "Level and topicId are required" });
       }
 
-      const parsedLevel = z.enum(["B1", "B2", "C1"]).parse(level);
+      // Trim whitespace from level to avoid "B1 " invalid enum value error
+      const trimmedLevel = (level as string).trim();
+      const parsedLevel = z.enum(["B1", "B1+", "B2", "B2+", "C1", "C2"]).parse(trimmedLevel);
       const parsedTopicId = parseInt(topicId as string);
       
-      const topic = await storage.getTopicById(parsedTopicId);
+      // For Free Mode with custom topic, we don't need to fetch a topic from the database
+      let topicName = "";
       
-      if (!topic) {
-        return res.status(404).json({ message: "Topic not found" });
+      if (freeMode === 'true' && customTopic) {
+        // Use the custom topic name directly
+        topicName = customTopic as string;
+        console.log(`🆓 FREE MODE: Using custom topic "${topicName}" with level=${parsedLevel}`);
+      } else {
+        // Regular mode - fetch topic from database
+        const topic = await storage.getTopicById(parsedTopicId);
+        
+        if (!topic) {
+          return res.status(404).json({ message: "Topic not found" });
+        }
+        
+        topicName = topic.name;
       }
 
       // Always generate fresh prompts if the continue=true parameter is present
@@ -85,13 +99,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       // Always log when generating new prompts
       if (continueParam) {
-        console.log(`🔄 REGENERATING PROMPTS: User continued practice with level=${parsedLevel}, topic=${topic.name}, continue=true`);
+        console.log(`🔄 REGENERATING PROMPTS: User continued practice with level=${parsedLevel}, topic=${topicName}, continue=true`);
       } else {
-        console.log(`🆕 GENERATING PROMPTS: Initial load with level=${parsedLevel}, topic=${topic.name}`);
+        console.log(`🆕 GENERATING PROMPTS: Initial load with level=${parsedLevel}, topic=${topicName}`);
       }
 
       // Generate new prompts using Gemini
-      const prompts = await generatePrompts(parsedLevel, topic.name);
+      const prompts = await generatePrompts(parsedLevel, topicName);
       
       // Add a session identifier to track groups of prompts generated together
       // This helps ensure diversity in future sessions

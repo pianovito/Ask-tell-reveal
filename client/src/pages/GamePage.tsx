@@ -80,10 +80,31 @@ export default function GamePage() {
   // Include continue=true parameter when user wants fresh prompts
   // Add freeMode parameter to indicate we're in free mode
   // For Random Mode, use the randomTopicId
+  // For Free Mode, include the customTopic parameter
+  const queryParams = new URLSearchParams({
+    level,
+    topicId: isRandomMode ? randomTopicId : topicId,
+    counter: promptsCounter.toString(),
+    continue: continuePractice.toString(),
+    freeMode: isFreeMode.toString()
+  });
+  
+  // Add customTopic parameter only in Free Mode
+  if (isFreeMode && customTopic) {
+    queryParams.append('customTopic', customTopic);
+  }
+  
+  const queryUrl = `/api/prompts?${queryParams.toString()}`;
+  
   const { data: promptsData, isLoading: isPromptsLoading, error, refetch } = useQuery<GamePrompts>({
-    queryKey: [`/api/prompts?level=${level}&topicId=${isRandomMode ? randomTopicId : topicId}&counter=${promptsCounter}&continue=${continuePractice}&freeMode=${isFreeMode}`],
-    // Don't fetch prompts in free mode or if we're in random mode but don't have a topic yet
-    enabled: !isFreeMode && (!isRandomMode || (isRandomMode && randomTopicId !== topicId))
+    queryKey: [queryUrl],
+    // Enable the query for:
+    // 1. Free Mode with custom topic
+    // 2. Regular mode (not free mode, not random mode)
+    // 3. Random Mode with a valid randomTopicId
+    enabled: (isFreeMode && !!customTopic) || 
+             (!isFreeMode && !isRandomMode) || 
+             (!isFreeMode && isRandomMode && !!randomTopicId && randomTopicId !== "1")
   });
 
   // Initialize or refresh stage sequence when prompts data is loaded or when requesting new prompts
@@ -172,6 +193,13 @@ export default function GamePage() {
       return;
     }
     
+    // Increment the counter to force a new fetch for all non-free modes
+    const newCounter = promptsCounter + 1;
+    setPromptsCounter(newCounter);
+    
+    // Set continue flag to true to force fresh prompts
+    setContinuePractice(true);
+    
     // In random mode, switch to a new random topic before continuing
     if (isRandomMode && allTopics.length > 1) {
       // Filter out current topic ID to avoid repeating
@@ -192,26 +220,23 @@ export default function GamePage() {
           variant: "default"
         });
         
+        // Reset the stage sequence since we have a new topic
+        setStageSequence(shuffleArray([0, 1, 2]));
+        setCurrentStageIndex(0);
+        
         console.log(`Random Mode: Switching to new topic ID: ${newRandomTopicId}`);
       }
     }
     
-    // In normal mode with prompts:
-    // Increment the counter to force a new fetch
-    const newCounter = promptsCounter + 1;
-    setPromptsCounter(newCounter);
-    
-    // Set continue flag to true to force fresh prompts
-    setContinuePractice(true);
-    
     // Flag that we want new prompts to update the sequence
     setWantNewPrompts(true);
     
-    // Explicitly force a refetch
-    refetch();
-    
-    // Log what we're doing
-    console.log(`Continuing with new prompts - forcing a refetch with continue=true and counter=${newCounter}`);
+    // Wait a moment for state updates to propagate before refetching
+    setTimeout(() => {
+      // Explicitly force a refetch
+      refetch();
+      console.log(`Continuing with new prompts - forcing a refetch with continue=true and counter=${newCounter}`);
+    }, 100);
   };
 
   const handleEndActivity = () => {
@@ -361,7 +386,7 @@ export default function GamePage() {
             <>
               <GameHeader 
                 level={level}
-                topic={topic?.name || "Topic"}
+                topic={isFreeMode ? customTopic : (topic?.name || "Topic")}
                 currentStage={
                   isFreeMode ? 
                     (stageSequence[currentStageIndex] === 0 ? "Ask" : 
@@ -445,11 +470,11 @@ export default function GamePage() {
                     <div className="text-center p-6 bg-white rounded-lg shadow-sm">
                       <p className="text-lg mb-4">
                         {stageSequence[currentStageIndex] === 0 ? (
-                          <>Ask your partner a question about <strong>{topic?.name}</strong></>
+                          <>Ask your partner a question about <strong>{customTopic || topic?.name}</strong></>
                         ) : stageSequence[currentStageIndex] === 1 ? (
-                          <>Tell your partner something about <strong>{topic?.name}</strong></>
+                          <>Tell your partner something about <strong>{customTopic || topic?.name}</strong></>
                         ) : (
-                          <>Reveal something personal related to <strong>{topic?.name}</strong></>
+                          <>Reveal something personal related to <strong>{customTopic || topic?.name}</strong></>
                         )}
                       </p>
                       <div className="inline-block bg-gray-100 px-3 py-1 rounded-full text-sm text-gray-600">
