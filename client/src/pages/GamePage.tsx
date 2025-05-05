@@ -451,6 +451,7 @@ export default function GamePage() {
                 }
                 stageIndex={currentStageIndex}
                 totalStages={stageSequence.length}
+                groupXP={groupXP}
               />
 
               {wantNewPrompts ? (

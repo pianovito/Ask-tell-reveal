@@ -65,6 +65,19 @@ export default function GameHeader({ level, topic, currentStage, stageIndex, tot
                 className={`h-2 bg-gray-100 [&>div]:bg-gradient-to-r ${colorScheme.progress}`}
               />
             </div>
+            
+            {/* XP Counter */}
+            <div className="mt-2 flex items-center justify-center">
+              <motion.div
+                initial={{ scale: 1 }}
+                animate={{ scale: [1, 1.2, 1] }}
+                transition={{ duration: 0.6, repeat: 3, repeatType: "reverse" }}
+                className="bg-yellow-100 border border-yellow-300 rounded-full px-3 py-1 text-sm font-bold text-yellow-700 flex items-center"
+              >
+                <i className="fas fa-star text-yellow-500 mr-1"></i>
+                <span>{groupXP} XP</span>
+              </motion.div>
+            </div>
           </div>
         </div>
 

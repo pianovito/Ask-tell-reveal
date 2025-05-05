@@ -177,18 +177,20 @@ export default function Home() {
               <div className="mt-3 border-t border-purple-100 pt-3">
                 <div className="flex flex-col items-center justify-center space-y-3">
                   <p className="text-sm text-[#9b59b6] font-medium flex items-center">
-                    <motion.div
-                      animate={{ rotate: 360 }}
-                      transition={{ 
-                        repeat: Infinity,
-                        duration: 3,
-                        ease: "linear" 
-                      }}
-                      className="inline-block mr-2"
-                    >
-                      <i className="fas fa-sync-alt"></i>
-                    </motion.div> 
-                    Spin Topic Wheel - Topic will change automatically after each round
+                    <div className="flex items-center justify-center w-full">
+                      <motion.div
+                        animate={{ rotate: 360 }}
+                        transition={{ 
+                          repeat: Infinity,
+                          duration: 2,
+                          ease: "linear" 
+                        }}
+                        className="flex items-center justify-center bg-purple-200 text-purple-800 rounded-full w-12 h-12 mr-3 shadow-md"
+                      >
+                        <i className="fas fa-sync-alt text-lg"></i>
+                      </motion.div> 
+                      <span>Spin Topic Wheel - Topics change automatically each round</span>
+                    </div>
                   </p>
                 </div>
               </div>
