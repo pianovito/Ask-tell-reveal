@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 interface PromptCardProps {
   prompt: Prompt;
   isLoading: boolean;
+  score?: number; // Add score prop
 }
 
 const stageColors = {
