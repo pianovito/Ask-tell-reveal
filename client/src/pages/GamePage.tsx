@@ -313,6 +313,66 @@ export default function GamePage() {
     });
   };
   
+  // Handle spinning the topic wheel - changes to a random topic while keeping the current XP
+  const handleSpinTopicWheel = () => {
+    if (allTopics.length <= 1) {
+      toast({
+        title: "Cannot Spin Wheel",
+        description: "Not enough topics available to spin the wheel",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Filter out current topic to avoid getting the same one again
+    const availableTopics = allTopics.filter(t => t.id.toString() !== topicId);
+    
+    if (availableTopics.length > 0) {
+      // Select a random topic from available ones
+      const randomIndex = Math.floor(Math.random() * availableTopics.length);
+      const newTopicId = availableTopics[randomIndex].id.toString();
+      const newTopicName = availableTopics[randomIndex].name;
+      
+      // For Random Mode, update the randomTopicId
+      if (isRandomMode) {
+        setRandomTopicId(newTopicId);
+      }
+      
+      // Reset the stage sequence for the new topic
+      setStageSequence(shuffleArray([0, 1, 2]));
+      setCurrentStageIndex(0);
+      
+      // Set continue flag and increment counter to force a fresh fetch
+      setContinuePractice(true);
+      setPromptsCounter(prev => prev + 1);
+      
+      // Show success notification with spinning animation in the toast
+      toast({
+        title: "Topic Wheel Spun!",
+        description: (
+          <div className="flex items-center">
+            <span className="mr-2">New topic:</span>
+            <span className="font-semibold">{newTopicName}</span>
+          </div>
+        ),
+        variant: "default",
+      });
+      
+      // Navigate to the new URL with the new topic ID, but retain other parameters
+      const newUrl = `/game?level=${level}&topic=${newTopicId}${isFreeMode ? `&customTopic=${encodeURIComponent(customTopic)}&freeMode=true` : ''}${isRandomMode ? '&randomMode=true' : ''}`;
+      
+      // Use replace instead of navigate to avoid adding to browser history
+      navigate(newUrl, { replace: true });
+      
+      // Force a refetch after state updates
+      setTimeout(() => {
+        refetch();
+      }, 100);
+      
+      console.log(`Spin Topic Wheel: Changed to topic ID: ${newTopicId}`);
+    }
+  };
+  
   // Generate random keywords for Free Mode
   const generateRandomKeywords = () => {
     const topicWords = [
@@ -471,6 +531,27 @@ export default function GamePage() {
                     <p className="text-gray-600 mb-4">
                       You've completed this set of prompts. Would you like to continue with a new set of randomized prompts or end this practice session?
                     </p>
+                    
+                    {/* Spin Topic Wheel Button */}
+                    <div className="mb-4 mt-6 flex justify-center">
+                      <Button
+                        onClick={handleSpinTopicWheel}
+                        className="bg-[#9b59b6] hover:bg-[#9b59b6]/90 text-white font-semibold px-6 py-3 rounded-full"
+                      >
+                        <motion.span 
+                          animate={{ rotate: 360 }}
+                          transition={{ 
+                            repeat: Infinity,
+                            duration: 2,
+                            ease: "linear" 
+                          }}
+                          className="inline-block mr-2"
+                        >
+                          <i className="fas fa-sync-alt"></i>
+                        </motion.span>
+                        Spin Topic Wheel
+                      </Button>
+                    </div>
                   </div>
                   
                   <div className="flex justify-center gap-4">
