@@ -139,15 +139,6 @@ export default function GroupAchievements({ topicId, level }: GroupAchievementsP
                 </div>
               ))}
             </div>
-            
-            {/* Topic Wheel Button */}
-            <div className="mt-4 flex justify-center">
-              <button
-                className="bg-[#9b59b6] hover:bg-[#9b59b6]/90 text-white px-4 py-2 rounded-full text-sm flex items-center shadow-md transition-colors"
-              >
-                <i className="fas fa-dharmachakra animate-spin-slow mr-2"></i> Spin Topic Wheel
-              </button>
-            </div>
           </motion.div>
         )}
       </AnimatePresence>
