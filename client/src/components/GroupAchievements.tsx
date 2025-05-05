@@ -16,22 +16,25 @@ export default function GroupAchievements({ topicId, level }: GroupAchievementsP
     achievements: [...defaultAchievements]
   });
 
-  // Simulated XP gain - would be connected to actual gameplay
+  // Connect to the game's XP system instead of using a timer
+  // We'll store a map of previously seen topics to track Topic Explorer achievement
+  const [visitedTopics, setVisitedTopics] = useState<Set<string>>(new Set());
+  
+  // Update visited topics when topicId changes
   useEffect(() => {
-    const interval = setInterval(() => {
-      setGameStats(prev => ({
-        ...prev,
-        groupXP: prev.groupXP + Math.floor(Math.random() * 5) + 1
-      }));
-    }, 30000); // Add XP every 30 seconds
-
-    return () => clearInterval(interval);
-  }, []);
-
-  // Simulate achievement progress
+    if (topicId) {
+      setVisitedTopics(prev => {
+        const newSet = new Set(prev);
+        newSet.add(topicId.toString());
+        return newSet;
+      });
+    }
+  }, [topicId]);
+  
+  // Track Next button clicks for Vocabulary Master achievement
   useEffect(() => {
-    if (gameStats.groupXP > 50) {
-      // Update the "Vocabulary Master" achievement progress
+    const handleCustomEvent = (e: CustomEvent) => {
+      // Update Vocabulary Master progress
       setGameStats(prev => {
         const updatedAchievements = [...prev.achievements];
         const vocabMasterIndex = updatedAchievements.findIndex(a => a.id === "vocabulary_master");
@@ -50,11 +53,45 @@ export default function GroupAchievements({ topicId, level }: GroupAchievementsP
         
         return {
           ...prev,
+          achievements: updatedAchievements,
+          groupXP: e.detail?.xp || prev.groupXP // Update XP if provided in the event
+        };
+      });
+    };
+    
+    // Listen for Next button clicks
+    window.addEventListener('nextButtonClicked' as any, handleCustomEvent);
+    
+    return () => {
+      window.removeEventListener('nextButtonClicked' as any, handleCustomEvent);
+    };
+  }, []);
+  
+  // Update Topic Explorer achievement when visitedTopics changes
+  useEffect(() => {
+    if (visitedTopics.size > 0) {
+      setGameStats(prev => {
+        const updatedAchievements = [...prev.achievements];
+        const topicExplorerIndex = updatedAchievements.findIndex(a => a.id === "topic_explorer");
+        
+        if (topicExplorerIndex >= 0 && updatedAchievements[topicExplorerIndex].progress !== undefined) {
+          // Update progress to match the number of unique topics visited
+          const newProgress = Math.min(visitedTopics.size, updatedAchievements[topicExplorerIndex].maxProgress!);
+          updatedAchievements[topicExplorerIndex].progress = newProgress;
+          
+          // Check if completed
+          if (newProgress >= updatedAchievements[topicExplorerIndex].maxProgress!) {
+            updatedAchievements[topicExplorerIndex].isUnlocked = true;
+          }
+        }
+        
+        return {
+          ...prev,
           achievements: updatedAchievements
         };
       });
     }
-  }, [gameStats.groupXP]);
+  }, [visitedTopics]);
 
   return (
     <div className="fixed bottom-4 right-4 z-50">

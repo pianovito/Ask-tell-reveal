@@ -153,6 +153,12 @@ export default function GamePage() {
   }, [level, topicId, topic, isRandomMode, randomTopicId, allTopics.length, promptsData, stageSequence, currentStageIndex, isTopicLoading, isTopicsLoading, isPromptsLoading, error]);
 
   const handleNext = useCallback(() => {
+    // Dispatch a custom event to trigger Vocabulary Master achievement progress
+    const event = new CustomEvent('nextButtonClicked', { 
+      detail: { xp: groupXP } 
+    });
+    window.dispatchEvent(event);
+    
     if (currentStageIndex < stageSequence.length - 1) {
       // Move to the next stage in our sequence
       setCurrentStageIndex(prev => prev + 1);
