@@ -44,13 +44,54 @@ export default function GamePage() {
   const [showSummary, setShowSummary] = useState<boolean>(false);
   const [wantNewPrompts, setWantNewPrompts] = useState<boolean>(false);
   const [promptsCounter, setPromptsCounter] = useState<number>(0); // Counter to force refetch
-  const [groupXP, setGroupXP] = useState<number>(0); // Track Group XP
-  const [keywordsUsed, setKeywordsUsed] = useState<number>(0); // Track keywords used
-  const [roundsCompleted, setRoundsCompleted] = useState<number>(0); // Track rounds completed
+  const [groupXP, setGroupXP] = useState<number>(Number(localStorage.getItem('groupXP')) || 0); // Track Group XP from localStorage or default to 0
+  const [keywordsUsed, setKeywordsUsed] = useState<number>(Number(localStorage.getItem('keywordsUsed')) || 0); // Track keywords used from localStorage
+  const [roundsCompleted, setRoundsCompleted] = useState<number>(Number(localStorage.getItem('roundsCompleted')) || 0); // Track rounds completed
   const [freeKeywords, setFreeKeywords] = useState<string[]>([]); // Keywords for free mode
   const [randomTopicId, setRandomTopicId] = useState<string>(topicId); // For Random Mode
   const [allTopics, setAllTopics] = useState<Topic[]>([]); // Store all topics for Random Mode
-  const [achievements, setAchievements] = useState([...defaultAchievements]); // Achievement tracking
+  // Initialize achievements with saved progress
+  const initializeAchievements = () => {
+    // First check if we have stored achievements
+    const storedAchievements = localStorage.getItem('achievements');
+    if (storedAchievements) {
+      try {
+        // If we have previously stored achievements, use those
+        return JSON.parse(storedAchievements);
+      } catch (e) {
+        console.error("Error parsing stored achievements:", e);
+        // Continue with default method if parsing fails
+      }
+    }
+    
+    // Otherwise initialize from defaults with progress numbers
+    const newAchievements = [...defaultAchievements];
+    
+    // Update Vocabulary Master achievement with saved keywordsUsed
+    const vocabMaster = newAchievements.find(a => a.id === "vocabulary_master");
+    if (vocabMaster) {
+      vocabMaster.progress = Number(localStorage.getItem('keywordsUsed')) || 0;
+      if (vocabMaster.progress >= (vocabMaster.maxProgress || 5)) {
+        vocabMaster.isUnlocked = true;
+      }
+    }
+    
+    // Update Topic Explorer achievement with saved roundsCompleted
+    const topicExplorer = newAchievements.find(a => a.id === "topic_explorer");
+    if (topicExplorer) {
+      topicExplorer.progress = Number(localStorage.getItem('roundsCompleted')) || 0;
+      if (topicExplorer.progress >= (topicExplorer.maxProgress || 3)) {
+        topicExplorer.isUnlocked = true;
+      }
+    }
+    
+    // Log the initialized achievements
+    console.log("Initialized achievements:", newAchievements);
+    
+    return newAchievements;
+  };
+  
+  const [achievements, setAchievements] = useState(initializeAchievements()); // Achievement tracking with saved progress
   const [, navigate] = useLocation();
   const { toast } = useToast();
 
@@ -237,7 +278,33 @@ export default function GamePage() {
 
   const handleContinue = () => {
     // Increment rounds completed counter
-    setRoundsCompleted(prevRounds => prevRounds + 1);
+    const newRoundsCompleted = roundsCompleted + 1;
+    setRoundsCompleted(newRoundsCompleted);
+    
+    // Update Topic Explorer achievement in real-time
+    const updatedAchievements = [...achievements];
+    const topicExplorerAchievement = updatedAchievements.find(a => a.id === "topic_explorer");
+    if (topicExplorerAchievement) {
+      topicExplorerAchievement.progress = newRoundsCompleted;
+      if (newRoundsCompleted >= (topicExplorerAchievement.maxProgress || 3)) {
+        topicExplorerAchievement.isUnlocked = true;
+        
+        // Show toast for achievement unlocked
+        if (!topicExplorerAchievement.isUnlocked) {
+          toast({
+            title: "Achievement Unlocked!",
+            description: "Topic Explorer: Practiced with 3 different topics",
+            variant: "default",
+          });
+        }
+      }
+    }
+    
+    // Save updated values to localStorage
+    localStorage.setItem('roundsCompleted', newRoundsCompleted.toString());
+    localStorage.setItem('achievements', JSON.stringify(updatedAchievements));
+    
+    setAchievements(updatedAchievements);
     
     // In free mode, we just need to generate a new sequence
     if (isFreeMode) {
@@ -329,6 +396,9 @@ export default function GamePage() {
     localStorage.setItem('keywordsUsed', keywordsUsed.toString());
     localStorage.setItem('groupXP', groupXP.toString());
     localStorage.setItem('roundsCompleted', roundsCompleted.toString());
+    
+    // Also save achievement state
+    localStorage.setItem('achievements', JSON.stringify(updatedAchievements));
     
     setAchievements(updatedAchievements);
     setShowSummary(true);
@@ -512,6 +582,7 @@ export default function GamePage() {
     // Save achievement progress to localStorage
     localStorage.setItem('keywordsUsed', newKeywordsUsed.toString());
     localStorage.setItem('groupXP', newXP.toString());
+    localStorage.setItem('achievements', JSON.stringify(updatedAchievements));
     
     // Add a visual indication for debugging
     toast({
