@@ -298,6 +298,104 @@ export default function GamePage() {
   const handleNewTopic = () => {
     navigate("/");
   };
+  
+  const handleSpinTopicWheel = () => {
+    // In Random Mode or when changing topics, pick a new topic
+    if (allTopics.length > 1) {
+      // Filter out current topic ID to avoid repeating
+      const activeTopicId = isRandomMode ? randomTopicId : topicId;
+      const availableTopics = allTopics.filter(t => t.id.toString() !== activeTopicId);
+      
+      if (availableTopics.length > 0) {
+        // Select a random topic from available ones
+        const randomIndex = Math.floor(Math.random() * availableTopics.length);
+        const newTopicId = availableTopics[randomIndex].id.toString();
+        const newTopicName = availableTopics[randomIndex].name;
+        
+        // For Random Mode, update the randomTopicId
+        if (isRandomMode) {
+          setRandomTopicId(newTopicId);
+        }
+        
+        // Reset the stage sequence for the new topic
+        setStageSequence(shuffleArray([0, 1, 2]));
+        setCurrentStageIndex(0);
+        
+        // Set continue flag and increment counter to force a fresh fetch
+        setContinuePractice(true);
+        setPromptsCounter(prev => prev + 1);
+        
+        // Show success notification with spinning animation in the toast
+        toast({
+          title: "Topic Wheel Spun!",
+          description: (
+            <div className="flex items-center">
+              <span className="mr-2">New topic:</span>
+              <span className="font-semibold">{newTopicName}</span>
+            </div>
+          ),
+          variant: "default",
+        });
+        
+        // Navigate to the new URL with the new topic ID, but retain other parameters
+        const newUrl = `/game?level=${level}&topic=${newTopicId}${isFreeMode ? `&customTopic=${encodeURIComponent(customTopic)}&freeMode=true` : ''}${isRandomMode ? '&randomMode=true' : ''}`;
+        
+        // Use replace instead of navigate to avoid adding to browser history
+        navigate(newUrl, { replace: true });
+        
+        // Force a refetch after state updates
+        setTimeout(() => {
+          refetch();
+        }, 100);
+      } else {
+        // No other topics available, show a message
+        toast({
+          title: "No other topics available",
+          description: "Try adding more topics to spin the wheel!",
+          variant: "destructive",
+        });
+      }
+    } else {
+      // Not enough topics to spin, fetch all topics first
+      if (!isTopicsLoading) {
+        // This will trigger a fetch if we haven't loaded all topics yet
+        const fetchTopicsQuery = async () => {
+          try {
+            const response = await fetch('/api/topics');
+            const data = await response.json();
+            setAllTopics(data);
+            
+            if (data.length > 1) {
+              // Call this function again now that we have topics
+              setTimeout(handleSpinTopicWheel, 100);
+            } else {
+              toast({
+                title: "Not enough topics",
+                description: "Need at least 2 topics to spin the wheel.",
+                variant: "destructive",
+              });
+            }
+          } catch (error) {
+            console.error("Failed to fetch topics:", error);
+            toast({
+              title: "Error fetching topics",
+              description: "Could not get available topics to spin wheel.",
+              variant: "destructive",
+            });
+          }
+        };
+        
+        fetchTopicsQuery();
+      } else {
+        // Still loading topics
+        toast({
+          title: "Loading topics...",
+          description: "Please wait while we prepare the topic wheel.",
+          variant: "default",
+        });
+      }
+    }
+  };
 
   const handleKeywordClick = (word: string) => {
     // Add 1 XP per keyword clicked and store the new value in a variable
@@ -311,66 +409,6 @@ export default function GamePage() {
       description: `Used keyword: "${word}"`,
       variant: "default",
     });
-  };
-  
-  // Handle spinning the topic wheel - changes to a random topic while keeping the current XP
-  const handleSpinTopicWheel = () => {
-    if (allTopics.length <= 1) {
-      toast({
-        title: "Cannot Spin Wheel",
-        description: "Not enough topics available to spin the wheel",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    // Filter out current topic to avoid getting the same one again
-    const availableTopics = allTopics.filter(t => t.id.toString() !== topicId);
-    
-    if (availableTopics.length > 0) {
-      // Select a random topic from available ones
-      const randomIndex = Math.floor(Math.random() * availableTopics.length);
-      const newTopicId = availableTopics[randomIndex].id.toString();
-      const newTopicName = availableTopics[randomIndex].name;
-      
-      // For Random Mode, update the randomTopicId
-      if (isRandomMode) {
-        setRandomTopicId(newTopicId);
-      }
-      
-      // Reset the stage sequence for the new topic
-      setStageSequence(shuffleArray([0, 1, 2]));
-      setCurrentStageIndex(0);
-      
-      // Set continue flag and increment counter to force a fresh fetch
-      setContinuePractice(true);
-      setPromptsCounter(prev => prev + 1);
-      
-      // Show success notification with spinning animation in the toast
-      toast({
-        title: "Topic Wheel Spun!",
-        description: (
-          <div className="flex items-center">
-            <span className="mr-2">New topic:</span>
-            <span className="font-semibold">{newTopicName}</span>
-          </div>
-        ),
-        variant: "default",
-      });
-      
-      // Navigate to the new URL with the new topic ID, but retain other parameters
-      const newUrl = `/game?level=${level}&topic=${newTopicId}${isFreeMode ? `&customTopic=${encodeURIComponent(customTopic)}&freeMode=true` : ''}${isRandomMode ? '&randomMode=true' : ''}`;
-      
-      // Use replace instead of navigate to avoid adding to browser history
-      navigate(newUrl, { replace: true });
-      
-      // Force a refetch after state updates
-      setTimeout(() => {
-        refetch();
-      }, 100);
-      
-      console.log(`Spin Topic Wheel: Changed to topic ID: ${newTopicId}`);
-    }
   };
   
   // Generate random keywords for Free Mode
