@@ -57,23 +57,30 @@ export default function Home() {
   const handleStartGame = () => {
     if (isRandomMode) {
       // Random mode: uses all topics in a random order
-      const url = `/game?level=${selectedLevel}&randomMode=true`;
+      // We'll still need a default topicId, but the game will pick a random one
+      const url = `/game?level=${selectedLevel}&randomMode=true&topic=1`;
       console.log("Navigating to random mode:", url);
       navigate(url);
     } else if (isFreeMode && customTopic) {
-      // Use the custom topic in free mode
-      const url = `/game?level=${selectedLevel}&customTopic=${encodeURIComponent(customTopic)}&freeMode=${isFreeMode}`;
+      // Free Mode with custom topic - generate prompts based on the custom topic
+      // We still need a topicId parameter (required by API), but it's mostly ignored in Free Mode
+      const url = `/game?level=${selectedLevel}&customTopic=${encodeURIComponent(customTopic)}&freeMode=true&topic=1`;
       console.log("Navigating to free mode with custom topic:", url);
       navigate(url);
     } else if (selectedTopic) {
-      // Use the selected topic card
-      const url = `/game?level=${selectedLevel}&topic=${selectedTopic.id}&freeMode=${isFreeMode}`;
-      console.log("Navigating to:", url);
+      // Regular mode with selected topic card
+      const url = `/game?level=${selectedLevel}&topic=${selectedTopic.id}`;
+      console.log("Navigating to game with topic:", url);
       navigate(url);
     } else {
+      // Show appropriate error message based on mode
       toast({
         title: "Select a topic",
-        description: isFreeMode ? "Please enter a custom topic or select one from the cards." : "Please select a topic before starting.",
+        description: isFreeMode 
+          ? "Please enter a custom topic in the text box." 
+          : isRandomMode 
+            ? "Random Mode is selected but couldn't initialize. Please try again." 
+            : "Please select a topic before starting.",
         variant: "default",
       });
     }
@@ -169,7 +176,7 @@ export default function Home() {
           <div className="mt-8 text-center">
             <Button
               onClick={handleStartGame}
-              disabled={!isRandomMode && !(isFreeMode && customTopic) && !selectedTopic}
+              disabled={(!isRandomMode && !selectedTopic && !(isFreeMode && customTopic))}
               className="bg-[#3498db] hover:bg-[#3498db]/90 text-white font-bold text-lg py-4 px-10 rounded-full transition-colors shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <i className="fas fa-play mr-2"></i> Start Game
