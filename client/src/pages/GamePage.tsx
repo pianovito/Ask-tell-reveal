@@ -9,10 +9,14 @@ import HintWords from "@/components/HintWords";
 import GameComplete from "@/components/GameComplete";
 import HelpModal from "@/components/HelpModal";
 import GroupAchievements from "@/components/GroupAchievements";
+import GameSummary from "@/components/GameSummary";
 import { Prompt, CEFRLevel, Topic, GamePrompts } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
+import { defaultAchievements } from "@/lib/types";
+import { InsertGameRecord } from "@shared/schema";
+import { apiRequest } from "@/lib/queryClient";
 
 // Function to shuffle an array (Fisher-Yates algorithm)
 function shuffleArray<T>(array: T[]): T[] {
@@ -38,12 +42,16 @@ export default function GamePage() {
   const [currentStageIndex, setCurrentStageIndex] = useState<number>(0);
   const [showHelpModal, setShowHelpModal] = useState<boolean>(false);
   const [showComplete, setShowComplete] = useState<boolean>(false);
+  const [showSummary, setShowSummary] = useState<boolean>(false);
   const [wantNewPrompts, setWantNewPrompts] = useState<boolean>(false);
   const [promptsCounter, setPromptsCounter] = useState<number>(0); // Counter to force refetch
   const [groupXP, setGroupXP] = useState<number>(0); // Track Group XP
+  const [keywordsUsed, setKeywordsUsed] = useState<number>(0); // Track keywords used
+  const [roundsCompleted, setRoundsCompleted] = useState<number>(0); // Track rounds completed
   const [freeKeywords, setFreeKeywords] = useState<string[]>([]); // Keywords for free mode
   const [randomTopicId, setRandomTopicId] = useState<string>(topicId); // For Random Mode
   const [allTopics, setAllTopics] = useState<Topic[]>([]); // Store all topics for Random Mode
+  const [achievements, setAchievements] = useState([...defaultAchievements]); // Achievement tracking
   const [, navigate] = useLocation();
   const { toast } = useToast();
 

@@ -1,6 +1,7 @@
 import { users, type User, type InsertUser } from "@shared/schema";
 import { topics, type Topic, type InsertTopic } from "@shared/schema";
 import { prompts, type Prompt, type InsertPrompt } from "@shared/schema";
+import { gameRecords, type GameRecord, type InsertGameRecord } from "@shared/schema";
 import { db } from "./db";
 import { eq, and } from "drizzle-orm";
 
@@ -20,6 +21,11 @@ export interface IStorage {
   // Prompt methods
   getPromptsByLevelAndTopic(level: string, topicId: number): Promise<Prompt[]>;
   createPrompt(prompt: InsertPrompt): Promise<Prompt>;
+
+  // Game record methods
+  getGameRecordsByClassId(classId: string): Promise<GameRecord[]>;
+  getGameRecordsByStudentName(studentName: string): Promise<GameRecord[]>;
+  createGameRecord(gameRecord: InsertGameRecord): Promise<GameRecord>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -78,6 +84,24 @@ export class DatabaseStorage implements IStorage {
     };
     
     const result = await db.insert(prompts).values(typedPromptData).returning();
+    return result[0];
+  }
+
+  // Game record methods
+  async getGameRecordsByClassId(classId: string): Promise<GameRecord[]> {
+    return await db.select()
+      .from(gameRecords)
+      .where(eq(gameRecords.classId, classId));
+  }
+
+  async getGameRecordsByStudentName(studentName: string): Promise<GameRecord[]> {
+    return await db.select()
+      .from(gameRecords)
+      .where(eq(gameRecords.studentName, studentName));
+  }
+
+  async createGameRecord(insertGameRecord: InsertGameRecord): Promise<GameRecord> {
+    const result = await db.insert(gameRecords).values(insertGameRecord).returning();
     return result[0];
   }
 }
