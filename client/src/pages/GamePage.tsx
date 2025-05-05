@@ -16,7 +16,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { defaultAchievements } from "@/lib/types";
 import { InsertGameRecord } from "@shared/schema";
-import { apiRequest } from "@/lib/queryClient";
 
 // Function to shuffle an array (Fisher-Yates algorithm)
 function shuffleArray<T>(array: T[]): T[] {
@@ -237,6 +236,9 @@ export default function GamePage() {
   }, [currentStageIndex, stageSequence, wantNewPrompts, promptsCounter, refetch, isFreeMode, isRandomMode, randomTopicId, allTopics]);
 
   const handleContinue = () => {
+    // Increment rounds completed counter
+    setRoundsCompleted(prevRounds => prevRounds + 1);
+    
     // In free mode, we just need to generate a new sequence
     if (isFreeMode) {
       setStageSequence(shuffleArray([0, 1, 2]));
@@ -302,7 +304,59 @@ export default function GamePage() {
   };
 
   const handleEndActivity = () => {
-    setShowComplete(true);
+    // Update achievements based on current stats
+    const updatedAchievements = [...achievements];
+    
+    // Update Topic Explorer achievement (based on rounds completed)
+    const topicExplorerAchievement = updatedAchievements.find(a => a.id === "topic-explorer");
+    if (topicExplorerAchievement) {
+      topicExplorerAchievement.progress = roundsCompleted;
+      if (roundsCompleted >= (topicExplorerAchievement.maxProgress || 5)) {
+        topicExplorerAchievement.isUnlocked = true;
+      }
+    }
+    
+    // Update Vocabulary Master achievement (based on keywords used)
+    const vocabularyMasterAchievement = updatedAchievements.find(a => a.id === "vocabulary-master");
+    if (vocabularyMasterAchievement) {
+      vocabularyMasterAchievement.progress = keywordsUsed;
+      if (keywordsUsed >= (vocabularyMasterAchievement.maxProgress || 10)) {
+        vocabularyMasterAchievement.isUnlocked = true;
+      }
+    }
+    
+    setAchievements(updatedAchievements);
+    setShowSummary(true);
+  };
+
+  // Save game results to database
+  const handleSaveResults = async (data: InsertGameRecord): Promise<void> => {
+    try {
+      const response = await fetch('/api/game-records', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(data),
+      });
+      
+      if (response.ok) {
+        toast({
+          title: "Results Saved",
+          description: "Your game results have been saved successfully.",
+          variant: "default",
+        });
+      } else {
+        throw new Error('Failed to save results');
+      }
+    } catch (error) {
+      console.error('Error saving game results:', error);
+      toast({
+        title: "Save Failed",
+        description: "Could not save your game results. Please try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   const handleRestart = () => {
@@ -415,6 +469,10 @@ export default function GamePage() {
     // Add 1 XP per keyword clicked and store the new value in a variable
     const newXP = groupXP + 1;
     setGroupXP(newXP); 
+    
+    // Track keywords used count
+    const newKeywordsUsed = keywordsUsed + 1;
+    setKeywordsUsed(newKeywordsUsed);
     
     // Dispatch custom event for XP update to ensure it's reflected everywhere
     const event = new CustomEvent('xpUpdated', { 
@@ -557,7 +615,21 @@ export default function GamePage() {
 
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
-          {!showComplete ? (
+          {showSummary ? (
+            <GameSummary 
+              onPlayAgain={handleRestart}
+              onNewTopic={handleNewTopic}
+              onSaveResults={handleSaveResults}
+              score={groupXP}
+              level={level}
+              topic={topic || null}
+              topicName={isFreeMode ? customTopic : (topic?.name || "Topic")}
+              achievements={achievements}
+              keywordsUsed={keywordsUsed}
+              roundsCompleted={roundsCompleted}
+              showTeacherDashboardOptions={true}
+            />
+          ) : !showComplete ? (
             <>
               <GameHeader 
                 level={level}
