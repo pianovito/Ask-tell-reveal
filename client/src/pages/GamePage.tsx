@@ -778,24 +778,34 @@ export default function GamePage() {
                   )}
                 
                   <div className="flex justify-between items-center mt-6">
-                    {/* Spin Topic Wheel Button */}
-                    <Button
-                      onClick={handleSpinTopicWheel}
-                      className="bg-[#9b59b6] hover:bg-[#9b59b6]/90 text-white font-semibold px-6 py-2 rounded-full"
-                    >
-                      <motion.span 
-                        animate={{ rotate: 360 }}
-                        transition={{ 
-                          repeat: Infinity,
-                          duration: 2,
-                          ease: "linear" 
-                        }}
-                        className="inline-block mr-2"
+                    <div className="flex gap-2">
+                      {/* Spin Topic Wheel Button */}
+                      <Button
+                        onClick={handleSpinTopicWheel}
+                        className="bg-[#9b59b6] hover:bg-[#9b59b6]/90 text-white font-semibold px-6 py-2 rounded-full"
                       >
-                        <i className="fas fa-sync-alt"></i>
-                      </motion.span>
-                      Spin Topic Wheel
-                    </Button>
+                        <motion.span 
+                          animate={{ rotate: 360 }}
+                          transition={{ 
+                            repeat: Infinity,
+                            duration: 2,
+                            ease: "linear" 
+                          }}
+                          className="inline-block mr-2"
+                        >
+                          <i className="fas fa-sync-alt"></i>
+                        </motion.span>
+                        Spin Topic Wheel
+                      </Button>
+                      
+                      {/* End Game Button */}
+                      <Button
+                        onClick={handleEndActivity}
+                        className="bg-[#e74c3c] hover:bg-[#e74c3c]/90 text-white font-semibold px-6 py-2 rounded-full"
+                      >
+                        <i className="fas fa-flag-checkered mr-2"></i> End Game
+                      </Button>
+                    </div>
                     
                     {/* Next Button */}
                     <Button
@@ -825,24 +835,34 @@ export default function GamePage() {
                   />
                 
                   <div className="flex justify-between items-center mt-6">
-                    {/* Spin Topic Wheel Button */}
-                    <Button
-                      onClick={handleSpinTopicWheel}
-                      className="bg-[#9b59b6] hover:bg-[#9b59b6]/90 text-white font-semibold px-6 py-2 rounded-full"
-                    >
-                      <motion.span 
-                        animate={{ rotate: 360 }}
-                        transition={{ 
-                          repeat: Infinity,
-                          duration: 2,
-                          ease: "linear" 
-                        }}
-                        className="inline-block mr-2"
+                    <div className="flex gap-2">
+                      {/* Spin Topic Wheel Button */}
+                      <Button
+                        onClick={handleSpinTopicWheel}
+                        className="bg-[#9b59b6] hover:bg-[#9b59b6]/90 text-white font-semibold px-6 py-2 rounded-full"
                       >
-                        <i className="fas fa-sync-alt"></i>
-                      </motion.span>
-                      Spin Topic Wheel
-                    </Button>
+                        <motion.span 
+                          animate={{ rotate: 360 }}
+                          transition={{ 
+                            repeat: Infinity,
+                            duration: 2,
+                            ease: "linear" 
+                          }}
+                          className="inline-block mr-2"
+                        >
+                          <i className="fas fa-sync-alt"></i>
+                        </motion.span>
+                        Spin Topic Wheel
+                      </Button>
+                      
+                      {/* End Game Button */}
+                      <Button
+                        onClick={handleEndActivity}
+                        className="bg-[#e74c3c] hover:bg-[#e74c3c]/90 text-white font-semibold px-6 py-2 rounded-full"
+                      >
+                        <i className="fas fa-flag-checkered mr-2"></i> End Game
+                      </Button>
+                    </div>
                     
                     {/* Next Button */}
                     <Button
