@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { InsertGameRecord } from "@shared/schema";
-import { Topic, Achievement, CEFRLevel } from "@/lib/types";
+import { Topic, CEFRLevel } from "@/lib/types";
 
 interface GameSummaryProps {
   onPlayAgain: () => void;
@@ -13,7 +13,6 @@ interface GameSummaryProps {
   level: CEFRLevel;
   topic: Topic | null;
   topicName: string;
-  achievements: Achievement[];
   keywordsUsed: number;
   roundsCompleted: number;
   showTeacherDashboardOptions: boolean;
@@ -26,7 +25,6 @@ export default function GameSummary({
   level,
   topic,
   topicName,
-  achievements,
   keywordsUsed,
   roundsCompleted,
   showTeacherDashboardOptions
@@ -36,10 +34,7 @@ export default function GameSummary({
   const [isSaving, setIsSaving] = useState(false);
   const [showSaveForm, setShowSaveForm] = useState(false);
   
-  // Count unlocked achievements
-  const unlockedAchievements = achievements.filter(a => a.isUnlocked).length;
-  
-  // Grade calculation removed with XP system
+  // Achievement tracking removed
   
   const handleSaveResults = async () => {
     if (!studentName) return;
@@ -56,7 +51,7 @@ export default function GameSummary({
         score: 0, // Score set to 0 as XP system is removed
         keywordsUsed,
         roundsCompleted,
-        achievementsUnlocked: unlockedAchievements,
+        achievementsUnlocked: 0, // No achievements to unlock as the system is removed
         completedAt: new Date()
       };
       
@@ -90,7 +85,7 @@ export default function GameSummary({
               }}
               className="text-3xl text-blue-600"
             >
-              <i className="fas fa-trophy"></i>
+              <i className="fas fa-check-circle"></i>
             </motion.div>
           </div>
         </div>
@@ -115,35 +110,7 @@ export default function GameSummary({
           </div>
         </div>
         
-        {/* Achievements section */}
-        <div className="mb-6">
-          <h3 className="font-semibold text-gray-700 mb-3">Achievements Unlocked ({unlockedAchievements}/{achievements.length})</h3>
-          <div className="grid grid-cols-3 gap-2">
-            {achievements.map((achievement) => (
-              <div
-                key={achievement.id}
-                className={`p-2 rounded-lg flex flex-col items-center ${
-                  achievement.isUnlocked ? "bg-gradient-to-b from-amber-50 to-amber-100" : "bg-gray-100"
-                }`}
-              >
-                <div className={`text-2xl mb-1 ${achievement.isUnlocked ? "text-amber-500" : "text-gray-400"}`}>
-                  <i className={`fas ${achievement.icon}`}></i>
-                </div>
-                <div className={`text-xs font-medium ${achievement.isUnlocked ? "text-amber-800" : "text-gray-500"}`}>
-                  {achievement.name}
-                </div>
-                {achievement.progress !== undefined && achievement.maxProgress !== undefined && (
-                  <div className="w-full bg-gray-200 rounded-full h-1.5 mt-1">
-                    <div
-                      className="bg-amber-500 h-1.5 rounded-full"
-                      style={{ width: `${Math.min(100, (achievement.progress / achievement.maxProgress) * 100)}%` }}
-                    ></div>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
-        </div>
+        {/* Achievements section removed */}
         
         {/* Teacher dashboard options */}
         {showTeacherDashboardOptions && (

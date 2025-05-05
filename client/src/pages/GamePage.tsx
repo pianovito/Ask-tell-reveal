@@ -613,7 +613,6 @@ export default function GamePage() {
               level={level}
               topic={topic || null}
               topicName={isFreeMode ? customTopic : (topic?.name || "Topic")}
-              achievements={achievements}
               keywordsUsed={keywordsUsed}
               roundsCompleted={roundsCompleted}
               showTeacherDashboardOptions={true}
