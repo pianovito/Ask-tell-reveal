@@ -509,10 +509,13 @@ export default function GamePage() {
     
     console.log(`Keyword clicked: ${word}, +1 XP added. Total: ${newXP}`);
     
-    // Show toast notification
+    // Calculate the total score (5 base for question + keywords)
+    const totalScore = 5 + newKeywordsUsed;
+    
+    // Show toast notification with more detailed information
     toast({
-      title: `+1 XP (Total: ${newXP})`,
-      description: `Used keyword: "${word}"`,
+      title: `+1 XP for keyword: "${word}"`,
+      description: `Total score: ${totalScore} (5 base + ${newKeywordsUsed} keywords)`,
       variant: "default",
     });
   };
