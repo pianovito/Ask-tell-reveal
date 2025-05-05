@@ -8,13 +8,13 @@ import PromptCard from "@/components/PromptCard";
 import HintWords from "@/components/HintWords";
 import GameComplete from "@/components/GameComplete";
 import HelpModal from "@/components/HelpModal";
-import GroupAchievements from "@/components/GroupAchievements";
+// GroupAchievements component removed
 import GameSummary from "@/components/GameSummary";
 import { Prompt, CEFRLevel, Topic, GamePrompts } from "@/lib/types";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
-import { defaultAchievements } from "@/lib/types";
+// Removed defaultAchievements import
 import { InsertGameRecord } from "@shared/schema";
 
 // Function to shuffle an array (Fisher-Yates algorithm)
@@ -50,14 +50,7 @@ export default function GamePage() {
   const [freeKeywords, setFreeKeywords] = useState<string[]>([]); // Keywords for free mode
   const [randomTopicId, setRandomTopicId] = useState<string>(topicId); // For Random Mode
   const [allTopics, setAllTopics] = useState<Topic[]>([]); // Store all topics for Random Mode
-  // Initialize achievements 
-  const initializeAchievements = () => {
-    // Simple initialization with default achievements
-    const newAchievements = [...defaultAchievements];
-    return newAchievements;
-  };
-  
-  const [achievements, setAchievements] = useState(initializeAchievements()); // Achievement tracking with saved progress
+  // Removed achievements initialization and tracking
   const [, navigate] = useLocation();
   const { toast } = useToast();
 
@@ -607,8 +600,7 @@ export default function GamePage() {
     <div className="bg-gradient-to-b from-[#ecf0f1] to-[#e0f2e9] min-h-screen font-['Nunito']">
       <AppHeader onHelpClick={() => setShowHelpModal(true)} />
       
-      {/* Group Achievements Panel */}
-      <GroupAchievements topicId={topicId} level={level} />
+      {/* Removed Group Achievements Panel */}
 
       <main className="container mx-auto px-4 py-8">
         <div className="max-w-4xl mx-auto">
