@@ -361,9 +361,25 @@ export default function GamePage() {
   };
 
   const handleEndActivity = () => {
-    // Save session statistics to localStorage
+    // Increment rounds completed for the current round if there are completed stages
+    if (gameStats.stagesCompleted > 0) {
+      setGameStats(prev => {
+        // Only increment rounds if we've completed at least one stage in this round
+        const completedThisRound = currentStageIndex > 0 || wantNewPrompts;
+        const newRounds = completedThisRound ? prev.roundsCompleted + 1 : prev.roundsCompleted;
+        
+        // Save updated statistics to localStorage
+        localStorage.setItem('roundsCompleted', newRounds.toString());
+        
+        return { 
+          ...prev, 
+          roundsCompleted: newRounds 
+        };
+      });
+    }
+    
+    // Save other session statistics to localStorage
     localStorage.setItem('keywordsUsed', gameStats.keywordsUsed.toString());
-    localStorage.setItem('roundsCompleted', gameStats.roundsCompleted.toString());
     localStorage.setItem('score', gameStats.score.toString());
     localStorage.setItem('stagesCompleted', gameStats.stagesCompleted.toString());
     localStorage.setItem('streak', gameStats.streak.toString());
