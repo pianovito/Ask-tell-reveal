@@ -1,4 +1,4 @@
-import { pgTable, text, serial, integer, boolean, json } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, json, timestamp } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
@@ -82,3 +82,23 @@ export const promptResponseSchema = z.object({
 });
 
 export type PromptResponse = z.infer<typeof promptResponseSchema>;
+
+// Game record schema for tracking completed games in teacher dashboard
+export const gameRecords = pgTable("game_records", {
+  id: serial("id").primaryKey(),
+  studentName: text("student_name").notNull(),
+  classId: text("class_id"),
+  level: text("level").notNull(),
+  topicId: integer("topic_id").references(() => topics.id).notNull(),
+  topicName: text("topic_name").notNull(),
+  score: integer("score").notNull(),
+  achievementsUnlocked: integer("achievements_unlocked").notNull(),
+  keywordsUsed: integer("keywords_used").notNull(),
+  completedAt: timestamp("completed_at").defaultNow(),
+  roundsCompleted: integer("rounds_completed").notNull()
+});
+
+export const insertGameRecordSchema = createInsertSchema(gameRecords);
+
+export type InsertGameRecord = z.infer<typeof insertGameRecordSchema>;
+export type GameRecord = typeof gameRecords.$inferSelect;

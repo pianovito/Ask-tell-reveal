@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { generatePrompts } from "./gemini";
-import { promptRequestSchema } from "../shared/schema";
+import { promptRequestSchema, insertGameRecordSchema } from "../shared/schema";
 import { z } from "zod";
 
 export async function registerRoutes(app: Express): Promise<Server> {
@@ -134,6 +134,27 @@ export async function registerRoutes(app: Express): Promise<Server> {
     } catch (error) {
       console.error('Error generating prompts:', error);
       res.status(500).json({ message: "Failed to generate prompts" });
+    }
+  });
+  
+  // POST a new game record for teacher dashboard
+  app.post("/api/game-records", async (req, res) => {
+    try {
+      // Validate request body
+      const result = insertGameRecordSchema.safeParse(req.body);
+      
+      if (!result.success) {
+        return res.status(400).json({ 
+          error: "Invalid game record data",
+          details: result.error.format()
+        });
+      }
+      
+      const newGameRecord = await storage.createGameRecord(result.data);
+      res.status(201).json(newGameRecord);
+    } catch (error) {
+      console.error("Error saving game record:", error);
+      res.status(500).json({ error: "Failed to save game record" });
     }
   });
 
