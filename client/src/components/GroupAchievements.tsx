@@ -158,16 +158,16 @@ export default function GroupAchievements({ topicId, level }: GroupAchievementsP
               <i className="fas fa-users text-[#3498db] mr-2"></i> Group Progress
             </h3>
             
-            {/* XP Display */}
+            {/* Activity Stats */}
             <div className="mb-5">
               <div className="flex justify-between items-center mb-1">
-                <span className="text-sm font-semibold text-gray-600">Group XP</span>
-                <span className="text-sm font-bold text-[#2ecc71]">{gameStats.groupXP} XP</span>
+                <span className="text-sm font-semibold text-gray-600">Rounds Completed</span>
+                <span className="text-sm font-bold text-[#3498db]">{gameStats.roundsCompleted}</span>
               </div>
               <div className="bg-gray-100 h-3 rounded-full overflow-hidden">
                 <div 
-                  className="bg-gradient-to-r from-[#2ecc71] to-[#1abc9c] h-full rounded-full"
-                  style={{ width: `${Math.min(gameStats.groupXP / 2, 100)}%` }}
+                  className="bg-gradient-to-r from-[#3498db] to-[#2980b9] h-full rounded-full"
+                  style={{ width: `${Math.min(gameStats.roundsCompleted * 10, 100)}%` }}
                 ></div>
               </div>
             </div>

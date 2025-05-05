@@ -44,7 +44,7 @@ export default function GamePage() {
   const [showSummary, setShowSummary] = useState<boolean>(false);
   const [wantNewPrompts, setWantNewPrompts] = useState<boolean>(false);
   const [promptsCounter, setPromptsCounter] = useState<number>(0); // Counter to force refetch
-  const [groupXP, setGroupXP] = useState<number>(Number(localStorage.getItem('groupXP')) || 0); // Track Group XP from localStorage or default to 0
+  // XP tracking has been removed
   const [keywordsUsed, setKeywordsUsed] = useState<number>(Number(localStorage.getItem('keywordsUsed')) || 0); // Track keywords used from localStorage
   const [roundsCompleted, setRoundsCompleted] = useState<number>(Number(localStorage.getItem('roundsCompleted')) || 0); // Track rounds completed
   const [freeKeywords, setFreeKeywords] = useState<string[]>([]); // Keywords for free mode
@@ -341,15 +341,14 @@ export default function GamePage() {
   };
 
   const handleEndActivity = () => {
-    // Save current XP and counts to localStorage
+    // Save session statistics to localStorage
     localStorage.setItem('keywordsUsed', keywordsUsed.toString());
-    localStorage.setItem('groupXP', groupXP.toString());
     localStorage.setItem('roundsCompleted', roundsCompleted.toString());
     
     // Show summary screen
     setShowSummary(true);
     
-    console.log("End activity - Final score:", groupXP);
+    console.log("End activity - Session completed");
   };
 
   // Save game results to database
@@ -640,7 +639,7 @@ export default function GamePage() {
               onPlayAgain={handleRestart}
               onNewTopic={handleNewTopic}
               onSaveResults={handleSaveResults}
-              score={groupXP}
+
               level={level}
               topic={topic || null}
               topicName={isFreeMode ? customTopic : (topic?.name || "Topic")}
