@@ -167,25 +167,8 @@ export default function GamePage() {
   }, [level, topicId, topic, isRandomMode, randomTopicId, allTopics.length, promptsData, stageSequence, currentStageIndex, isTopicLoading, isTopicsLoading, isPromptsLoading, error]);
 
   const handleNext = useCallback(() => {
-    // Add 5 XP whenever Next is clicked (completing a stage)
-    const newXP = groupXP + 5;
-    setGroupXP(newXP);
-    
-    // Save to localStorage
-    localStorage.setItem('groupXP', newXP.toString());
-    
-    // Show XP gained toast
-    toast({
-      title: `+5 XP (Total: ${newXP})`,
-      description: "Completed a conversation stage",
-      variant: "default",
-    });
-    
-    // Dispatch a custom event to update XP display everywhere
-    const event = new CustomEvent('xpUpdated', { 
-      detail: { xp: newXP } 
-    });
-    window.dispatchEvent(event);
+    // Track the stage completion
+    console.log("Stage completed");
     
     if (currentStageIndex < stageSequence.length - 1) {
       // Move to the next stage in our sequence
@@ -261,18 +244,13 @@ export default function GamePage() {
     const newRoundsCompleted = roundsCompleted + 1;
     setRoundsCompleted(newRoundsCompleted);
     
-    // Add bonus XP for continuing (5 XP)
-    const newXP = groupXP + 5;
-    setGroupXP(newXP);
-    
     // Save values to localStorage
     localStorage.setItem('roundsCompleted', newRoundsCompleted.toString());
-    localStorage.setItem('groupXP', newXP.toString());
     
-    // Show XP bonus toast
+    // Show toast notification
     toast({
-      title: `+5 XP Bonus (Total: ${newXP})`,
-      description: "Continuing with a new round",
+      title: "New Round Started",
+      description: "Continuing with a new set of prompts",
       variant: "default",
     });
     

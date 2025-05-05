@@ -10,7 +10,6 @@ interface GameSummaryProps {
   onPlayAgain: () => void;
   onNewTopic: () => void;
   onSaveResults: (data: InsertGameRecord) => Promise<void>;
-  score: number;
   level: CEFRLevel;
   topic: Topic | null;
   topicName: string;
@@ -24,7 +23,6 @@ export default function GameSummary({
   onPlayAgain,
   onNewTopic,
   onSaveResults,
-  score,
   level,
   topic,
   topicName,
@@ -41,14 +39,7 @@ export default function GameSummary({
   // Count unlocked achievements
   const unlockedAchievements = achievements.filter(a => a.isUnlocked).length;
   
-  // Calculate grades based on score
-  const getGrade = () => {
-    if (score >= 20) return 'A+';
-    if (score >= 15) return 'A';
-    if (score >= 10) return 'B';
-    if (score >= 5) return 'C';
-    return 'D';
-  };
+  // Grade calculation removed with XP system
   
   const handleSaveResults = async () => {
     if (!studentName) return;
@@ -62,11 +53,11 @@ export default function GameSummary({
         topicId: topic?.id || 0,
         topicName,
         level,
-        score,
+        score: 0, // Score set to 0 as XP system is removed
         keywordsUsed,
         roundsCompleted,
         achievementsUnlocked: unlockedAchievements,
-        date: new Date().toISOString()
+        completedAt: new Date()
       };
       
       await onSaveResults(gameRecord);
@@ -113,16 +104,6 @@ export default function GameSummary({
         </div>
         
         <div className="grid grid-cols-2 gap-4 mb-6">
-          <div className="bg-blue-50 p-4 rounded-lg">
-            <div className="text-2xl font-bold text-blue-600 mb-1">{score}</div>
-            <div className="text-sm text-gray-600">Total XP</div>
-          </div>
-          
-          <div className="bg-purple-50 p-4 rounded-lg">
-            <div className="text-2xl font-bold text-purple-600 mb-1">{getGrade()}</div>
-            <div className="text-sm text-gray-600">Grade</div>
-          </div>
-          
           <div className="bg-amber-50 p-4 rounded-lg">
             <div className="text-2xl font-bold text-amber-600 mb-1">{keywordsUsed}</div>
             <div className="text-sm text-gray-600">Keywords Used</div>
