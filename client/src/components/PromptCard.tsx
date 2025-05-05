@@ -74,9 +74,15 @@ export default function PromptCard({ prompt, isLoading }: PromptCardProps) {
         </span>
         
         {/* Group XP Indicator */}
-        <Badge variant="secondary" className="bg-[#2ecc71]/20 text-[#2ecc71] hover:bg-[#2ecc71]/30">
-          <i className="fas fa-star mr-1 text-xs"></i> +5 XP
-        </Badge>
+        <motion.div
+          initial={{ scale: 0.9 }}
+          animate={{ scale: 1.1 }}
+          transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
+        >
+          <Badge variant="secondary" className="bg-[#2ecc71]/20 text-[#2ecc71] hover:bg-[#2ecc71]/30 text-sm">
+            <i className="fas fa-star mr-1 text-xs"></i> +5 XP
+          </Badge>
+        </motion.div>
       </div>
       
       <h3 className="font-['Quicksand'] text-xl md:text-2xl font-bold mb-3 text-[#34495e]">

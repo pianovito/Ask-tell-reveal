@@ -555,6 +555,13 @@ export default function GamePage() {
               >
                 <i className="fas fa-question-circle text-xl"></i>
               </button>
+              <button 
+                className="bg-[#e74c3c] text-white hover:bg-[#e74c3c]/90 transition-colors px-3 py-1 rounded-full text-sm"
+                onClick={handleEndActivity}
+                title="End Game"
+              >
+                <i className="fas fa-flag-checkered mr-1"></i> End Game
+              </button>
             </div>
           </div>
         </header>
