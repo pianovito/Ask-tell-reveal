@@ -80,7 +80,12 @@ export default function GameHeader({ level, topic, currentStage, stageIndex, tot
                 key={stage}
                 className={`flex flex-col items-center mx-3 ${isActive ? "" : "opacity-60"}`}
                 animate={isActive ? { scale: [1, 1.05, 1] } : {}}
-                transition={{ repeat: isActive ? Infinity : 0, duration: 2 }}
+                transition={{ 
+                  repeat: isActive ? Infinity : 0, 
+                  duration: 2,
+                  repeatType: "loop",
+                  ease: "easeInOut"
+                }}
               >
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-1 
                   ${isActive 

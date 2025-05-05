@@ -178,10 +178,49 @@ export default function GamePage() {
       console.log("Ready for new prompts");
     } else {
       // We've completed all stages in the current sequence
-      // Instead of showing "complete", ask if they want to continue with new prompts
+      
+      // In Random Mode, pick a new topic right away instead of asking if they want to continue
+      if (isRandomMode && allTopics.length > 1) {
+        // Filter out current topic ID to avoid repeating
+        const availableTopics = allTopics.filter(t => t.id.toString() !== randomTopicId);
+        
+        if (availableTopics.length > 0) {
+          // Select a random topic from available ones
+          const randomIndex = Math.floor(Math.random() * availableTopics.length);
+          const newRandomTopicId = availableTopics[randomIndex].id.toString();
+          
+          // Update the random topic ID
+          setRandomTopicId(newRandomTopicId);
+          
+          // Reset the stage sequence since we have a new topic
+          setStageSequence(shuffleArray([0, 1, 2]));
+          setCurrentStageIndex(0);
+          
+          // Set continue flag and increment counter to force a fresh fetch
+          setContinuePractice(true);
+          setPromptsCounter(prev => prev + 1);
+          
+          // Show toast notification
+          toast({
+            title: "New Topic",
+            description: `Changing to: ${availableTopics[randomIndex].name}`,
+            variant: "default"
+          });
+          
+          // Explicitly force a refetch after state updates
+          setTimeout(() => {
+            refetch();
+          }, 100);
+          
+          console.log(`Random Mode: Automatically switching to new topic ID: ${newRandomTopicId}`);
+          return;
+        }
+      }
+      
+      // For other modes, show "continue or end" prompt
       setWantNewPrompts(true);
     }
-  }, [currentStageIndex, stageSequence, wantNewPrompts, promptsCounter, refetch, isFreeMode]);
+  }, [currentStageIndex, stageSequence, wantNewPrompts, promptsCounter, refetch, isFreeMode, isRandomMode, randomTopicId, allTopics]);
 
   const handleContinue = () => {
     // In free mode, we just need to generate a new sequence
@@ -224,7 +263,16 @@ export default function GamePage() {
         setStageSequence(shuffleArray([0, 1, 2]));
         setCurrentStageIndex(0);
         
+        // Force an immediate refetch with the new topic
+        setTimeout(() => {
+          refetch();
+        }, 100);
+        
         console.log(`Random Mode: Switching to new topic ID: ${newRandomTopicId}`);
+        
+        // No need to wait for the user to continue further, as we're immediately loading new content
+        setWantNewPrompts(false);
+        return;
       }
     }
     
@@ -252,9 +300,17 @@ export default function GamePage() {
   };
 
   const handleKeywordClick = (word: string) => {
-    // Add 1 XP per keyword clicked
-    setGroupXP(prev => prev + 1);
-    console.log(`Keyword clicked: ${word}, +1 XP added. Total: ${groupXP + 1}`);
+    // Add 1 XP per keyword clicked and store the new value in a variable
+    const newXP = groupXP + 1;
+    setGroupXP(newXP); 
+    console.log(`Keyword clicked: ${word}, +1 XP added. Total: ${newXP}`);
+    
+    // Add a visual indication for debugging
+    toast({
+      title: `+1 XP (Total: ${newXP})`,
+      description: `Used keyword: "${word}"`,
+      variant: "default",
+    });
   };
   
   // Generate random keywords for Free Mode
