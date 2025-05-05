@@ -11,7 +11,6 @@ interface GroupAchievementsProps {
 export default function GroupAchievements({ topicId, level }: GroupAchievementsProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [gameStats, setGameStats] = useState<GameStats>({
-    groupXP: 0,
     roundsCompleted: 0,
     achievements: [...defaultAchievements]
   });
@@ -99,7 +98,7 @@ export default function GroupAchievements({ topicId, level }: GroupAchievementsP
         const newStats = {
           ...prev,
           achievements: updatedAchievements,
-          groupXP: e.detail?.xp || prev.groupXP // Update XP if provided in the event
+          roundsCompleted: prev.roundsCompleted // Ensure we keep this value
         };
         
         // Save to localStorage
@@ -109,28 +108,20 @@ export default function GroupAchievements({ topicId, level }: GroupAchievementsP
       });
     };
     
-    // Handle XP updates from keyword clicks
-    const handleXpUpdateEvent = (e: CustomEvent) => {
-      setGameStats(prev => {
-        const newStats = {
-          ...prev,
-          groupXP: e.detail?.xp || prev.groupXP
-        };
-        
-        // Save to localStorage
-        localStorage.setItem('groupAchievements', JSON.stringify(newStats));
-        
-        return newStats;
-      });
+    // Keyword clicks handler (XP references removed)
+    const handleKeywordUsedEvent = (e: CustomEvent) => {
+      // We're just tracking keyword usage without XP now
+      console.log("Keyword used:", e.detail?.word);
+      // No state updates needed since we removed XP tracking
     };
     
-    // Listen for both events
+    // Only listen for the next button event, removed XP event
     window.addEventListener('nextButtonClicked' as any, handleNextButtonEvent);
-    window.addEventListener('xpUpdated' as any, handleXpUpdateEvent);
+    window.addEventListener('keywordUsed' as any, handleKeywordUsedEvent);
     
     return () => {
       window.removeEventListener('nextButtonClicked' as any, handleNextButtonEvent);
-      window.removeEventListener('xpUpdated' as any, handleXpUpdateEvent);
+      window.removeEventListener('keywordUsed' as any, handleKeywordUsedEvent);
     };
   }, []);
 

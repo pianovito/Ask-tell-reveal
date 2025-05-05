@@ -32,7 +32,6 @@ export interface Achievement {
 }
 
 export interface GameStats {
-  groupXP: number;
   roundsCompleted: number;
   achievements: Achievement[];
 }
