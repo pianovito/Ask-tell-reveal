@@ -24,7 +24,7 @@ export async function initializeTopics() {
     await db.insert(topics).values([
       {
         name: "Your Class",
-        description: "School & classmates",
+        description: "Classroom relationships & fun dynamics",
         icon: "fa-graduation-cap",
         colorClass: "accent1"
       },
