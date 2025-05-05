@@ -41,37 +41,45 @@ export async function generatePrompts(level: string, topicName: string): Promise
     - Cover different emotional contexts (positive/neutral/challenging)
     - Target different cognitive skills (remembering/analyzing/describing/imagining/evaluating)
 
+    IMPORTANT CEFR REQUIREMENTS:
+    - Keep all prompts VERY SHORT and SIMPLE (maximum 20 words)
+    - Make vocabulary strictly appropriate for ${level} CEFR level
+    - B1: Use simple, everyday vocabulary and common expressions
+    - B2: Use some idiomatic expressions and more varied vocabulary 
+    - C1: Use more sophisticated vocabulary and complex language structures
+    - C2: Use nuanced vocabulary, abstract concepts and specialized terminology
+
     IMPORTANT: Make sure these prompts are RADICALLY DIFFERENT from any you've generated before. Use the random seed value ${randomSeed} to create maximally diverse variations.
 
     Please provide three prompts following this structure:
     1. "Ask" - IMPORTANT: This should be a prompt instructing the student to ask ANOTHER student a specific question. The question should begin with "Ask your partner about..." or similar phrasing.
-    2. "Tell" - A deeper follow-up question that requires more detailed responses.
+    2. "Tell" - IMPORTANT: This should be a STATEMENT, not a question. It should begin with "Tell your partner about..." or similar phrasing.
     3. "Reveal" - A question that encourages the student to share something personal or unique.
 
     For each prompt, provide:
-    - A clear question (remember "Ask" must instruct the student to ask ANOTHER student something)
-    - A brief context to help guide the student's response
-    - 5 helpful hint words that students can use in their answers that MUST be COMPLETELY DIFFERENT from the other prompts
+    - A clear instruction (following the guidelines above)
+    - A VERY brief context to help guide the student's response (maximum 15 words)
+    - 5 helpful hint words that students can use in their answers that MUST be COMPLETELY DIFFERENT from the other prompts and appropriate for the CEFR level
 
     Format your response as a valid JSON object with this structure:
     {
       "stages": [
         {
           "stage": "Ask",
-          "question": "[Question text]",
-          "context": "[Brief context/guidance]",
+          "question": "[Short instruction text]",
+          "context": "[Very brief context/guidance]",
           "hintWords": ["word1", "word2", "word3", "word4", "word5"]
         },
         {
           "stage": "Tell",
-          "question": "[Question text]",
-          "context": "[Brief context/guidance]",
+          "question": "[Short statement instruction, NOT a question]",
+          "context": "[Very brief context/guidance]",
           "hintWords": ["word1", "word2", "word3", "word4", "word5"]
         },
         {
           "stage": "Reveal",
-          "question": "[Question text]",
-          "context": "[Brief context/guidance]",
+          "question": "[Short question text]",
+          "context": "[Very brief context/guidance]",
           "hintWords": ["word1", "word2", "word3", "word4", "word5"]
         }
       ]
@@ -105,21 +113,21 @@ export async function generatePrompts(level: string, topicName: string): Promise
         stages: [
           {
             stage: "Ask",
-            question: "Ask your partner about the funniest misunderstanding they've had with a teacher or classmate.",
-            context: "Think about miscommunications, language mix-ups, or awkward situations that led to humor in the classroom.",
-            hintWords: ["hilarious", "misinterpret", "confusion", "laughing", "embarrassed"]
+            question: "Ask your partner about a funny moment with a teacher.",
+            context: "Think about humorous classroom situations.",
+            hintWords: ["amusing", "laugh", "accident", "joke", "surprise"]
           },
           {
             stage: "Tell",
-            question: "Tell me about the most memorable classroom tradition or inside joke in your class.",
-            context: "Consider special routines, nicknames, or recurring jokes that made your class unique and brought everyone together.",
-            hintWords: ["tradition", "nickname", "ritual", "bonding", "laughter"]
+            question: "Tell your partner about your class's special tradition.",
+            context: "Share something unique your class does together.",
+            hintWords: ["routine", "special", "together", "memory", "bond"]
           },
           {
             stage: "Reveal",
-            question: "Reveal which classmate had the most unusual or interesting personality and how it affected the class dynamics.",
-            context: "Think about someone with a unique character, quirky habits, or someone who always stood out in memorable ways.",
-            hintWords: ["eccentric", "quirky", "entertaining", "personality", "memorable"]
+            question: "Which classmate changes the classroom atmosphere the most?",
+            context: "Think about someone who brings energy to the class.",
+            hintWords: ["lively", "energy", "change", "impact", "feel"]
           }
         ]
       };
@@ -129,21 +137,21 @@ export async function generatePrompts(level: string, topicName: string): Promise
         stages: [
           {
             stage: "Ask",
-            question: `Ask your partner about their experiences with ${topicName}.`,
-            context: `Think about interesting aspects of ${topicName} you'd like to learn about from your partner.`,
-            hintWords: ["experiences", "memorable", "opinion", "specific", "feelings"]
+            question: `Ask your partner about their best ${topicName} experience.`,
+            context: `Focus on a specific memory they have.`,
+            hintWords: ["memory", "enjoy", "specific", "time", "place"]
           },
           {
             stage: "Tell",
-            question: `How has ${topicName} influenced or changed your life?`,
-            context: "Consider both positive and negative impacts.",
-            hintWords: ["impact", "change", "perspective", "significant", "reflection"]
+            question: `Tell your partner about how ${topicName} is part of your life.`,
+            context: "Share your personal connection to the topic.",
+            hintWords: ["daily", "habit", "routine", "connect", "regular"]
           },
           {
             stage: "Reveal",
-            question: `What's something about ${topicName} that you've never shared with others before?`,
-            context: "This can be a personal story, opinion, or realization.",
-            hintWords: ["secret", "personal", "unique", "surprising", "confession"]
+            question: `What surprising opinion do you have about ${topicName}?`,
+            context: "Share a thought others might not expect.",
+            hintWords: ["unusual", "different", "opinion", "surprise", "believe"]
           }
         ]
       };
