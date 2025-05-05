@@ -639,7 +639,27 @@ export default function GamePage() {
                     />
                   )}
                 
-                  <div className="flex justify-end mt-6">
+                  <div className="flex justify-between items-center mt-6">
+                    {/* Spin Topic Wheel Button */}
+                    <Button
+                      onClick={handleSpinTopicWheel}
+                      className="bg-[#9b59b6] hover:bg-[#9b59b6]/90 text-white font-semibold px-6 py-2 rounded-full"
+                    >
+                      <motion.span 
+                        animate={{ rotate: 360 }}
+                        transition={{ 
+                          repeat: Infinity,
+                          duration: 2,
+                          ease: "linear" 
+                        }}
+                        className="inline-block mr-2"
+                      >
+                        <i className="fas fa-sync-alt"></i>
+                      </motion.span>
+                      Spin Topic Wheel
+                    </Button>
+                    
+                    {/* Next Button */}
                     <Button
                       onClick={handleNext}
                       className="bg-[#3498db] hover:bg-[#3498db]/90 text-white font-semibold px-6 py-2 rounded-full"
@@ -666,7 +686,27 @@ export default function GamePage() {
                     onKeywordClick={handleKeywordClick}
                   />
                 
-                  <div className="flex justify-end mt-6">
+                  <div className="flex justify-between items-center mt-6">
+                    {/* Spin Topic Wheel Button */}
+                    <Button
+                      onClick={handleSpinTopicWheel}
+                      className="bg-[#9b59b6] hover:bg-[#9b59b6]/90 text-white font-semibold px-6 py-2 rounded-full"
+                    >
+                      <motion.span 
+                        animate={{ rotate: 360 }}
+                        transition={{ 
+                          repeat: Infinity,
+                          duration: 2,
+                          ease: "linear" 
+                        }}
+                        className="inline-block mr-2"
+                      >
+                        <i className="fas fa-sync-alt"></i>
+                      </motion.span>
+                      Spin Topic Wheel
+                    </Button>
+                    
+                    {/* Next Button */}
                     <Button
                       onClick={handleNext}
                       className="bg-[#3498db] hover:bg-[#3498db]/90 text-white font-semibold px-6 py-2 rounded-full"
