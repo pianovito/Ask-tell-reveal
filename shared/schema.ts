@@ -91,7 +91,7 @@ export const gameRecords = pgTable("game_records", {
   level: text("level").notNull(),
   topicId: integer("topic_id").references(() => topics.id).notNull(),
   topicName: text("topic_name").notNull(),
-  score: integer("score").notNull(),
+  score: integer("score").default(0), // Score field made optional with default of 0
   achievementsUnlocked: integer("achievements_unlocked").notNull(),
   keywordsUsed: integer("keywords_used").notNull(),
   completedAt: timestamp("completed_at").defaultNow(),

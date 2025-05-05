@@ -39,10 +39,10 @@ export default function HintWords({ words, onKeywordClick }: HintWordsProps) {
     if (onKeywordClick) {
       onKeywordClick(word);
       
-      // Show XP earned notification
+      // Show word used notification without XP references
       toast({
-        title: "+1 XP",
-        description: `Used keyword: "${word}"`,
+        title: "Word Used",
+        description: `You used the keyword: "${word}"`,
         variant: "default",
       });
     }
@@ -52,7 +52,7 @@ export default function HintWords({ words, onKeywordClick }: HintWordsProps) {
     <div className="mb-8">
       <div className="flex items-center mb-2">
         <span className="text-sm font-semibold text-gray-600 mr-2">Helpful Words:</span>
-        <span className="text-xs text-gray-500">(Click on words you use for +1 XP each)</span>
+        <span className="text-xs text-gray-500">(Click to mark words you've used in your answer)</span>
       </div>
       
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
