@@ -50,44 +50,10 @@ export default function GamePage() {
   const [freeKeywords, setFreeKeywords] = useState<string[]>([]); // Keywords for free mode
   const [randomTopicId, setRandomTopicId] = useState<string>(topicId); // For Random Mode
   const [allTopics, setAllTopics] = useState<Topic[]>([]); // Store all topics for Random Mode
-  // Initialize achievements with saved progress
+  // Initialize achievements 
   const initializeAchievements = () => {
-    // First check if we have stored achievements
-    const storedAchievements = localStorage.getItem('achievements');
-    if (storedAchievements) {
-      try {
-        // If we have previously stored achievements, use those
-        return JSON.parse(storedAchievements);
-      } catch (e) {
-        console.error("Error parsing stored achievements:", e);
-        // Continue with default method if parsing fails
-      }
-    }
-    
-    // Otherwise initialize from defaults with progress numbers
+    // Simple initialization with default achievements
     const newAchievements = [...defaultAchievements];
-    
-    // Update Vocabulary Master achievement with saved keywordsUsed
-    const vocabMaster = newAchievements.find(a => a.id === "vocabulary_master");
-    if (vocabMaster) {
-      vocabMaster.progress = Number(localStorage.getItem('keywordsUsed')) || 0;
-      if (vocabMaster.progress >= (vocabMaster.maxProgress || 5)) {
-        vocabMaster.isUnlocked = true;
-      }
-    }
-    
-    // Update Topic Explorer achievement with saved roundsCompleted
-    const topicExplorer = newAchievements.find(a => a.id === "topic_explorer");
-    if (topicExplorer) {
-      topicExplorer.progress = Number(localStorage.getItem('roundsCompleted')) || 0;
-      if (topicExplorer.progress >= (topicExplorer.maxProgress || 3)) {
-        topicExplorer.isUnlocked = true;
-      }
-    }
-    
-    // Log the initialized achievements
-    console.log("Initialized achievements:", newAchievements);
-    
     return newAchievements;
   };
   
@@ -201,9 +167,23 @@ export default function GamePage() {
   }, [level, topicId, topic, isRandomMode, randomTopicId, allTopics.length, promptsData, stageSequence, currentStageIndex, isTopicLoading, isTopicsLoading, isPromptsLoading, error]);
 
   const handleNext = useCallback(() => {
-    // Dispatch a custom event to trigger Vocabulary Master achievement progress
-    const event = new CustomEvent('nextButtonClicked', { 
-      detail: { xp: groupXP } 
+    // Add 5 XP whenever Next is clicked (completing a stage)
+    const newXP = groupXP + 5;
+    setGroupXP(newXP);
+    
+    // Save to localStorage
+    localStorage.setItem('groupXP', newXP.toString());
+    
+    // Show XP gained toast
+    toast({
+      title: `+5 XP (Total: ${newXP})`,
+      description: "Completed a conversation stage",
+      variant: "default",
+    });
+    
+    // Dispatch a custom event to update XP display everywhere
+    const event = new CustomEvent('xpUpdated', { 
+      detail: { xp: newXP } 
     });
     window.dispatchEvent(event);
     
@@ -281,30 +261,20 @@ export default function GamePage() {
     const newRoundsCompleted = roundsCompleted + 1;
     setRoundsCompleted(newRoundsCompleted);
     
-    // Update Topic Explorer achievement in real-time
-    const updatedAchievements = [...achievements];
-    const topicExplorerAchievement = updatedAchievements.find(a => a.id === "topic_explorer");
-    if (topicExplorerAchievement) {
-      topicExplorerAchievement.progress = newRoundsCompleted;
-      if (newRoundsCompleted >= (topicExplorerAchievement.maxProgress || 3)) {
-        topicExplorerAchievement.isUnlocked = true;
-        
-        // Show toast for achievement unlocked
-        if (!topicExplorerAchievement.isUnlocked) {
-          toast({
-            title: "Achievement Unlocked!",
-            description: "Topic Explorer: Practiced with 3 different topics",
-            variant: "default",
-          });
-        }
-      }
-    }
+    // Add bonus XP for continuing (5 XP)
+    const newXP = groupXP + 5;
+    setGroupXP(newXP);
     
-    // Save updated values to localStorage
+    // Save values to localStorage
     localStorage.setItem('roundsCompleted', newRoundsCompleted.toString());
-    localStorage.setItem('achievements', JSON.stringify(updatedAchievements));
+    localStorage.setItem('groupXP', newXP.toString());
     
-    setAchievements(updatedAchievements);
+    // Show XP bonus toast
+    toast({
+      title: `+5 XP Bonus (Total: ${newXP})`,
+      description: "Continuing with a new round",
+      variant: "default",
+    });
     
     // In free mode, we just need to generate a new sequence
     if (isFreeMode) {
@@ -371,39 +341,15 @@ export default function GamePage() {
   };
 
   const handleEndActivity = () => {
-    // Update achievements based on current stats
-    const updatedAchievements = [...achievements];
-    
-    // Update Topic Explorer achievement (based on rounds completed)
-    const topicExplorerAchievement = updatedAchievements.find(a => a.id === "topic_explorer");
-    if (topicExplorerAchievement) {
-      topicExplorerAchievement.progress = roundsCompleted;
-      if (roundsCompleted >= (topicExplorerAchievement.maxProgress || 3)) {
-        topicExplorerAchievement.isUnlocked = true;
-      }
-    }
-    
-    // Update Vocabulary Master achievement (based on keywords used)
-    const vocabularyMasterAchievement = updatedAchievements.find(a => a.id === "vocabulary_master");
-    if (vocabularyMasterAchievement) {
-      vocabularyMasterAchievement.progress = keywordsUsed;
-      if (keywordsUsed >= (vocabularyMasterAchievement.maxProgress || 5)) {
-        vocabularyMasterAchievement.isUnlocked = true;
-      }
-    }
-    
-    // Save achievement progress to localStorage
+    // Save current XP and counts to localStorage
     localStorage.setItem('keywordsUsed', keywordsUsed.toString());
     localStorage.setItem('groupXP', groupXP.toString());
     localStorage.setItem('roundsCompleted', roundsCompleted.toString());
     
-    // Also save achievement state
-    localStorage.setItem('achievements', JSON.stringify(updatedAchievements));
-    
-    setAchievements(updatedAchievements);
+    // Show summary screen
     setShowSummary(true);
     
-    console.log("End activity - Achievements updated:", updatedAchievements);
+    console.log("End activity - Final score:", groupXP);
   };
 
   // Save game results to database
@@ -543,7 +489,7 @@ export default function GamePage() {
   };
 
   const handleKeywordClick = (word: string) => {
-    // Add 1 XP per keyword clicked and store the new value in a variable
+    // Add 1 XP per keyword clicked
     const newXP = groupXP + 1;
     setGroupXP(newXP); 
     
@@ -551,25 +497,9 @@ export default function GamePage() {
     const newKeywordsUsed = keywordsUsed + 1;
     setKeywordsUsed(newKeywordsUsed);
     
-    // Update Vocabulary Master achievement in real-time
-    const updatedAchievements = [...achievements];
-    const vocabularyMasterAchievement = updatedAchievements.find(a => a.id === "vocabulary_master");
-    if (vocabularyMasterAchievement) {
-      vocabularyMasterAchievement.progress = newKeywordsUsed;
-      if (newKeywordsUsed >= (vocabularyMasterAchievement.maxProgress || 5)) {
-        vocabularyMasterAchievement.isUnlocked = true;
-        
-        // Show toast for achievement unlocked
-        if (!vocabularyMasterAchievement.isUnlocked) {
-          toast({
-            title: "Achievement Unlocked!",
-            description: "Vocabulary Master: Used 5 vocabulary keywords",
-            variant: "default",
-          });
-        }
-      }
-    }
-    setAchievements(updatedAchievements);
+    // Update count in localStorage
+    localStorage.setItem('keywordsUsed', newKeywordsUsed.toString());
+    localStorage.setItem('groupXP', newXP.toString());
     
     // Dispatch custom event for XP update to ensure it's reflected everywhere
     const event = new CustomEvent('xpUpdated', { 
@@ -577,14 +507,9 @@ export default function GamePage() {
     });
     window.dispatchEvent(event);
     
-    console.log(`Keyword clicked: ${word}, +1 XP added. Total: ${newXP}, Keywords used: ${newKeywordsUsed}`);
+    console.log(`Keyword clicked: ${word}, +1 XP added. Total: ${newXP}`);
     
-    // Save achievement progress to localStorage
-    localStorage.setItem('keywordsUsed', newKeywordsUsed.toString());
-    localStorage.setItem('groupXP', newXP.toString());
-    localStorage.setItem('achievements', JSON.stringify(updatedAchievements));
-    
-    // Add a visual indication for debugging
+    // Show toast notification
     toast({
       title: `+1 XP (Total: ${newXP})`,
       description: `Used keyword: "${word}"`,
