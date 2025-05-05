@@ -98,7 +98,12 @@ export default function GameSummary({
           Great job completing your speaking practice.
         </div>
         
-        <div className="grid grid-cols-2 gap-4 mb-6">
+        <div className="grid grid-cols-3 gap-4 mb-6">
+          <div className="bg-blue-50 p-4 rounded-lg">
+            <div className="text-2xl font-bold text-blue-600 mb-1">{score}</div>
+            <div className="text-sm text-gray-600">Total Score</div>
+          </div>
+
           <div className="bg-amber-50 p-4 rounded-lg">
             <div className="text-2xl font-bold text-amber-600 mb-1">{keywordsUsed}</div>
             <div className="text-sm text-gray-600">Keywords Used</div>

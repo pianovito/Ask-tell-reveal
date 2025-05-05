@@ -32,8 +32,17 @@ export interface Achievement {
 }
 
 export interface GameStats {
+  score: number;
   roundsCompleted: number;
-  achievements: Achievement[];
+  streak: number;
+  keywordsUsed: number;
+  stagesCompleted: number;
+}
+
+export interface ScoreUpdate {
+  points: number;
+  reason: string;
+  animation?: 'bounce' | 'fade' | 'spin';
 }
 
 // Default achievements to be unlocked during gameplay

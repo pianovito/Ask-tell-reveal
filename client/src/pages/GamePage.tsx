@@ -27,6 +27,20 @@ function shuffleArray<T>(array: T[]): T[] {
   return shuffled;
 }
 
+interface GameStats {
+  score: number;
+  roundsCompleted: number;
+  streak: number;
+  keywordsUsed: number;
+  stagesCompleted: number;
+}
+
+interface ScoreUpdate {
+  points: number;
+  reason: string;
+  animation?: string;
+}
+
 export default function GamePage() {
   const [, params] = useRoute("/game");
   const searchParams = new URLSearchParams(window.location.search);
@@ -35,7 +49,7 @@ export default function GamePage() {
   const customTopic = searchParams.get("customTopic") || "";
   const isFreeMode = searchParams.get("freeMode") === "true";
   const isRandomMode = searchParams.get("randomMode") === "true";
-  
+
   // Store a randomized sequence of stages (0, 1, 2 shuffled)
   const [stageSequence, setStageSequence] = useState<number[]>([]);
   const [currentStageIndex, setCurrentStageIndex] = useState<number>(0);
@@ -45,14 +59,37 @@ export default function GamePage() {
   const [wantNewPrompts, setWantNewPrompts] = useState<boolean>(false);
   const [promptsCounter, setPromptsCounter] = useState<number>(0); // Counter to force refetch
   // XP tracking has been removed
-  const [keywordsUsed, setKeywordsUsed] = useState<number>(Number(localStorage.getItem('keywordsUsed')) || 0); // Track keywords used from localStorage
-  const [roundsCompleted, setRoundsCompleted] = useState<number>(Number(localStorage.getItem('roundsCompleted')) || 0); // Track rounds completed
+  const [gameStats, setGameStats] = useState<GameStats>({
+    score: Number(localStorage.getItem('score')) || 0,
+    roundsCompleted: Number(localStorage.getItem('roundsCompleted')) || 0,
+    streak: Number(localStorage.getItem('streak')) || 0,
+    keywordsUsed: Number(localStorage.getItem('keywordsUsed')) || 0,
+    stagesCompleted: Number(localStorage.getItem('stagesCompleted')) || 0
+  });
   const [freeKeywords, setFreeKeywords] = useState<string[]>([]); // Keywords for free mode
   const [randomTopicId, setRandomTopicId] = useState<string>(topicId); // For Random Mode
   const [allTopics, setAllTopics] = useState<Topic[]>([]); // Store all topics for Random Mode
   // Removed achievements initialization and tracking
   const [, navigate] = useLocation();
   const { toast } = useToast();
+
+  const updateScore = (update: ScoreUpdate) => {
+    setGameStats(prev => {
+      const newScore = prev.score + update.points;
+      localStorage.setItem('score', newScore.toString());
+
+      toast({
+        title: `+${update.points} points!`,
+        description: update.reason,
+        variant: "default"
+      });
+
+      return {
+        ...prev,
+        score: newScore
+      };
+    });
+  };
 
   // Fetch all topics for random mode
   const { data: topicsData, isLoading: isTopicsLoading } = useQuery<Topic[]>({
@@ -64,7 +101,7 @@ export default function GamePage() {
   useEffect(() => {
     if (topicsData && isRandomMode) {
       setAllTopics(topicsData);
-      
+
       // If we have no randomTopicId set or we're initializing, pick a random topic
       if (randomTopicId === topicId || randomTopicId === "1") {
         const randomIndex = Math.floor(Math.random() * topicsData.length);
@@ -82,7 +119,7 @@ export default function GamePage() {
 
   // Continue parameter is set to true when user wants to continue with new prompts
   const [continuePractice, setContinuePractice] = useState<boolean>(false);
-  
+
   // Fetch prompts based on level and topic
   // Include continue=true parameter when user wants fresh prompts
   // Add freeMode parameter to indicate we're in free mode
@@ -95,14 +132,14 @@ export default function GamePage() {
     continue: continuePractice.toString(),
     freeMode: isFreeMode.toString()
   });
-  
+
   // Add customTopic parameter only in Free Mode
   if (isFreeMode && customTopic) {
     queryParams.append('customTopic', customTopic);
   }
-  
+
   const queryUrl = `/api/prompts?${queryParams.toString()}`;
-  
+
   const { data: promptsData, isLoading: isPromptsLoading, error, refetch } = useQuery<GamePrompts>({
     queryKey: [queryUrl],
     // Enable the query for:
@@ -129,13 +166,13 @@ export default function GamePage() {
       setStageSequence(shuffleArray([0, 1, 2]));
       setCurrentStageIndex(0);
       setWantNewPrompts(false);
-      
+
       // Reset continue flag after successful fetch
       if (continuePractice) {
         setContinuePractice(false);
         console.log("Reset continuePractice flag after successful fetch of new prompts");
       }
-      
+
       // Log the new sequence for debugging
       console.log("New randomized stage sequence created");
     }
@@ -155,30 +192,47 @@ export default function GamePage() {
       currentStageIndex,
       currentStage: stageSequence[currentStageIndex],
       isLoading: { topic: isTopicLoading, topics: isTopicsLoading, prompts: isPromptsLoading },
-      error
+      error,
+      gameStats
     });
-  }, [level, topicId, topic, isRandomMode, randomTopicId, allTopics.length, promptsData, stageSequence, currentStageIndex, isTopicLoading, isTopicsLoading, isPromptsLoading, error]);
+  }, [level, topicId, topic, isRandomMode, randomTopicId, allTopics.length, promptsData, stageSequence, currentStageIndex, isTopicLoading, isTopicsLoading, isPromptsLoading, error, gameStats]);
 
   const handleNext = useCallback(() => {
     // Track the stage completion
     console.log("Stage completed");
-    
+
     if (currentStageIndex < stageSequence.length - 1) {
       // Move to the next stage in our sequence
       setCurrentStageIndex(prev => prev + 1);
-      
+
+      setGameStats(prev => {
+        const newStages = prev.stagesCompleted + 1;
+        localStorage.setItem('stagesCompleted', newStages.toString());
+
+        updateScore({
+          points: 50,
+          reason: "Stage completed!",
+          animation: 'fade'
+        });
+
+        return {
+          ...prev,
+          stagesCompleted: newStages
+        };
+      });
+
       // In normal mode, generate new prompts after each stage to ensure variety
       if (!isFreeMode) {
         // Increment the counter to force a new fetch
         const newCounter = promptsCounter + 1;
         setPromptsCounter(newCounter);
-        
+
         // Set continue flag to true to force fresh prompts on every "Next" click
         setContinuePractice(true);
-        
+
         // Explicitly force a refetch but don't update the UI yet
         refetch();
-        
+
         console.log(`Generating fresh prompts in the background after Next button click (counter=${newCounter})`);
       } else {
         console.log("Free mode: moving to next stage without prompts");
@@ -188,45 +242,45 @@ export default function GamePage() {
       console.log("Ready for new prompts");
     } else {
       // We've completed all stages in the current sequence
-      
+
       // In Random Mode, pick a new topic right away instead of asking if they want to continue
       if (isRandomMode && allTopics.length > 1) {
         // Filter out current topic ID to avoid repeating
         const availableTopics = allTopics.filter(t => t.id.toString() !== randomTopicId);
-        
+
         if (availableTopics.length > 0) {
           // Select a random topic from available ones
           const randomIndex = Math.floor(Math.random() * availableTopics.length);
           const newRandomTopicId = availableTopics[randomIndex].id.toString();
-          
+
           // Update the random topic ID
           setRandomTopicId(newRandomTopicId);
-          
+
           // Reset the stage sequence since we have a new topic
           setStageSequence(shuffleArray([0, 1, 2]));
           setCurrentStageIndex(0);
-          
+
           // Set continue flag and increment counter to force a fresh fetch
           setContinuePractice(true);
           setPromptsCounter(prev => prev + 1);
-          
+
           // Show toast notification
           toast({
             title: "New Topic",
             description: `Changing to: ${availableTopics[randomIndex].name}`,
             variant: "default"
           });
-          
+
           // Explicitly force a refetch after state updates
           setTimeout(() => {
             refetch();
           }, 100);
-          
+
           console.log(`Random Mode: Automatically switching to new topic ID: ${newRandomTopicId}`);
           return;
         }
       }
-      
+
       // For other modes, show "continue or end" prompt
       setWantNewPrompts(true);
     }
@@ -234,19 +288,21 @@ export default function GamePage() {
 
   const handleContinue = () => {
     // Increment rounds completed counter
-    const newRoundsCompleted = roundsCompleted + 1;
-    setRoundsCompleted(newRoundsCompleted);
-    
-    // Save values to localStorage
-    localStorage.setItem('roundsCompleted', newRoundsCompleted.toString());
-    
+    setGameStats(prev => {
+      const newRounds = prev.roundsCompleted + 1;
+      localStorage.setItem('roundsCompleted', newRounds.toString());
+      updateScore({ points: 100, reason: "New Round Started!", animation: 'tada' });
+      return { ...prev, roundsCompleted: newRounds, streak: prev.streak + 1 };
+    });
+
+
     // Show toast notification
     toast({
       title: "New Round Started",
       description: "Continuing with a new set of prompts",
       variant: "default",
     });
-    
+
     // In free mode, we just need to generate a new sequence
     if (isFreeMode) {
       setStageSequence(shuffleArray([0, 1, 2]));
@@ -255,54 +311,54 @@ export default function GamePage() {
       console.log("Free Mode: Continuing with new randomized sequence");
       return;
     }
-    
+
     // Increment the counter to force a new fetch for all non-free modes
     const newCounter = promptsCounter + 1;
     setPromptsCounter(newCounter);
-    
+
     // Set continue flag to true to force fresh prompts
     setContinuePractice(true);
-    
+
     // In random mode, switch to a new random topic before continuing
     if (isRandomMode && allTopics.length > 1) {
       // Filter out current topic ID to avoid repeating
       const availableTopics = allTopics.filter(t => t.id.toString() !== randomTopicId);
-      
+
       if (availableTopics.length > 0) {
         // Select a random topic from available ones
         const randomIndex = Math.floor(Math.random() * availableTopics.length);
         const newRandomTopicId = availableTopics[randomIndex].id.toString();
-        
+
         // Update the random topic ID
         setRandomTopicId(newRandomTopicId);
-        
+
         // Show toast notification
         toast({
           title: "Topic Changed",
           description: `New topic: ${availableTopics[randomIndex].name}`,
           variant: "default"
         });
-        
+
         // Reset the stage sequence since we have a new topic
         setStageSequence(shuffleArray([0, 1, 2]));
         setCurrentStageIndex(0);
-        
+
         // Force an immediate refetch with the new topic
         setTimeout(() => {
           refetch();
         }, 100);
-        
+
         console.log(`Random Mode: Switching to new topic ID: ${newRandomTopicId}`);
-        
+
         // No need to wait for the user to continue further, as we're immediately loading new content
         setWantNewPrompts(false);
         return;
       }
     }
-    
+
     // Flag that we want new prompts to update the sequence
     setWantNewPrompts(true);
-    
+
     // Wait a moment for state updates to propagate before refetching
     setTimeout(() => {
       // Explicitly force a refetch
@@ -313,12 +369,15 @@ export default function GamePage() {
 
   const handleEndActivity = () => {
     // Save session statistics to localStorage
-    localStorage.setItem('keywordsUsed', keywordsUsed.toString());
-    localStorage.setItem('roundsCompleted', roundsCompleted.toString());
-    
+    localStorage.setItem('keywordsUsed', gameStats.keywordsUsed.toString());
+    localStorage.setItem('roundsCompleted', gameStats.roundsCompleted.toString());
+    localStorage.setItem('score', gameStats.score.toString());
+    localStorage.setItem('stagesCompleted', gameStats.stagesCompleted.toString());
+    localStorage.setItem('streak', gameStats.streak.toString());
+
     // Show summary screen
     setShowSummary(true);
-    
+
     console.log("End activity - Session completed");
   };
 
@@ -332,7 +391,7 @@ export default function GamePage() {
         },
         body: JSON.stringify(data),
       });
-      
+
       if (response.ok) {
         toast({
           title: "Results Saved",
@@ -359,33 +418,33 @@ export default function GamePage() {
   const handleNewTopic = () => {
     navigate("/");
   };
-  
+
   const handleSpinTopicWheel = () => {
     // In Random Mode or when changing topics, pick a new topic
     if (allTopics.length > 1) {
       // Filter out current topic ID to avoid repeating
       const activeTopicId = isRandomMode ? randomTopicId : topicId;
       const availableTopics = allTopics.filter(t => t.id.toString() !== activeTopicId);
-      
+
       if (availableTopics.length > 0) {
         // Select a random topic from available ones
         const randomIndex = Math.floor(Math.random() * availableTopics.length);
         const newTopicId = availableTopics[randomIndex].id.toString();
         const newTopicName = availableTopics[randomIndex].name;
-        
+
         // For Random Mode, update the randomTopicId
         if (isRandomMode) {
           setRandomTopicId(newTopicId);
         }
-        
+
         // Reset the stage sequence for the new topic
         setStageSequence(shuffleArray([0, 1, 2]));
         setCurrentStageIndex(0);
-        
+
         // Set continue flag and increment counter to force a fresh fetch
         setContinuePractice(true);
         setPromptsCounter(prev => prev + 1);
-        
+
         // Show success notification with spinning animation in the toast
         toast({
           title: "Topic Wheel Spun!",
@@ -397,13 +456,13 @@ export default function GamePage() {
           ),
           variant: "default",
         });
-        
+
         // Navigate to the new URL with the new topic ID, but retain other parameters
         const newUrl = `/game?level=${level}&topic=${newTopicId}${isFreeMode ? `&customTopic=${encodeURIComponent(customTopic)}&freeMode=true` : ''}${isRandomMode ? '&randomMode=true' : ''}`;
-        
+
         // Use replace instead of navigate to avoid adding to browser history
         navigate(newUrl, { replace: true });
-        
+
         // Force a refetch after state updates
         setTimeout(() => {
           refetch();
@@ -425,7 +484,7 @@ export default function GamePage() {
             const response = await fetch('/api/topics');
             const data = await response.json();
             setAllTopics(data);
-            
+
             if (data.length > 1) {
               // Call this function again now that we have topics
               setTimeout(handleSpinTopicWheel, 100);
@@ -445,7 +504,7 @@ export default function GamePage() {
             });
           }
         };
-        
+
         fetchTopicsQuery();
       } else {
         // Still loading topics
@@ -459,20 +518,23 @@ export default function GamePage() {
   };
 
   const handleKeywordClick = (word: string) => {
-    // Track keywords used count only for UX purposes
-    const newKeywordsUsed = keywordsUsed + 1;
-    setKeywordsUsed(newKeywordsUsed);
-    
-    console.log(`Keyword clicked: ${word}`);
-    
-    // Show toast notification without XP reference
-    toast({
-      title: `Keyword Used`,
-      description: `You used the keyword: "${word}"`,
-      variant: "default",
+    setGameStats(prev => {
+      const newKeywords = prev.keywordsUsed + 1;
+      localStorage.setItem('keywordsUsed', newKeywords.toString());
+
+      updateScore({
+        points: 10,
+        reason: `Used keyword: "${word}"`,
+        animation: 'bounce'
+      });
+
+      return {
+        ...prev,
+        keywordsUsed: newKeywords
+      };
     });
   };
-  
+
   // Generate random keywords for Free Mode
   const generateRandomKeywords = () => {
     const topicWords = [
@@ -481,24 +543,24 @@ export default function GamePage() {
       "highlight", "focus", "emphasize", "elaborate", "clarify",
       "illustrate", "demonstrate", "reflect", "examine", "investigate"
     ];
-    
+
     // Pick 5 random words
     const randomWords = [];
     const shuffledWords = shuffleArray([...topicWords]);
     for (let i = 0; i < 5; i++) {
       randomWords.push(shuffledWords[i]);
     }
-    
+
     // Set the new keywords in state
     setFreeKeywords(randomWords);
-    
+
     // Show confirmation toast
     toast({
       title: "Keywords Generated",
       description: "New keywords have been generated for your topic",
       variant: "default",
     });
-    
+
     return randomWords;
   };
 
@@ -548,7 +610,7 @@ export default function GamePage() {
             </div>
           </div>
         </header>
-        
+
         <main className="container mx-auto px-4 py-8">
           <div className="max-w-4xl mx-auto">
             <div className="flex justify-center my-10">
@@ -599,7 +661,7 @@ export default function GamePage() {
   return (
     <div className="bg-gradient-to-b from-[#ecf0f1] to-[#e0f2e9] min-h-screen font-['Nunito']">
       <AppHeader onHelpClick={() => setShowHelpModal(true)} />
-      
+
       {/* Removed Group Achievements Panel */}
 
       <main className="container mx-auto px-4 py-8">
@@ -613,8 +675,10 @@ export default function GamePage() {
               level={level}
               topic={topic || null}
               topicName={isFreeMode ? customTopic : (topic?.name || "Topic")}
-              keywordsUsed={keywordsUsed}
-              roundsCompleted={roundsCompleted}
+              keywordsUsed={gameStats.keywordsUsed}
+              roundsCompleted={gameStats.roundsCompleted}
+              score={gameStats.score}
+              stagesCompleted={gameStats.stagesCompleted}
               showTeacherDashboardOptions={true}
             />
           ) : !showComplete ? (
@@ -630,7 +694,7 @@ export default function GamePage() {
                 }
                 stageIndex={currentStageIndex}
                 totalStages={stageSequence.length}
-
+                score={gameStats.score}
               />
 
               {wantNewPrompts ? (
@@ -650,7 +714,7 @@ export default function GamePage() {
                     <p className="text-gray-600 mb-4">
                       You've completed this set of prompts. Would you like to continue with a new set of randomized prompts or end this practice session?
                     </p>
-                    
+
                     {/* Spin Topic Wheel Button */}
                     <div className="mb-4 mt-6 flex justify-center">
                       <Button
@@ -672,7 +736,7 @@ export default function GamePage() {
                       </Button>
                     </div>
                   </div>
-                  
+
                   <div className="flex justify-center gap-4">
                     <Button
                       onClick={handleContinue}
@@ -739,7 +803,7 @@ export default function GamePage() {
                       </div>
                     </div>
                   </div>
-                
+
                   {/* Keywords generator button for Free Mode */}
                   <div className="mt-6 mb-6">
                     <Button
@@ -749,16 +813,14 @@ export default function GamePage() {
                       <i className="fas fa-magic mr-2"></i> Generate Keywords
                     </Button>
                   </div>
-                  
+
                   {/* Display keywords if available */}
                   {freeKeywords.length > 0 && (
                     <HintWords 
                       words={freeKeywords}
                       onKeywordClick={handleKeywordClick}
                     />
-                  )}
-                
-                  <div className="flex justify-between items-center mt-6">
+                  )}<div className="flex justify-between items-center mt-6">
                     <div className="flex gap-2">
                       {/* Spin Topic Wheel Button */}
                       <Button
@@ -778,7 +840,7 @@ export default function GamePage() {
                         </motion.span>
                         Spin Topic Wheel
                       </Button>
-                      
+
                       {/* End Game Button */}
                       <Button
                         onClick={handleEndActivity}
@@ -787,7 +849,7 @@ export default function GamePage() {
                         <i className="fas fa-flag-checkered mr-2"></i> End Game
                       </Button>
                     </div>
-                    
+
                     {/* Next Button */}
                     <Button
                       onClick={handleNext}
@@ -814,7 +876,7 @@ export default function GamePage() {
                     words={currentPrompt.hintWords}
                     onKeywordClick={handleKeywordClick}
                   />
-                
+
                   <div className="flex justify-between items-center mt-6">
                     <div className="flex gap-2">
                       {/* Spin Topic Wheel Button */}
@@ -835,7 +897,7 @@ export default function GamePage() {
                         </motion.span>
                         Spin Topic Wheel
                       </Button>
-                      
+
                       {/* End Game Button */}
                       <Button
                         onClick={handleEndActivity}
@@ -844,7 +906,7 @@ export default function GamePage() {
                         <i className="fas fa-flag-checkered mr-2"></i> End Game
                       </Button>
                     </div>
-                    
+
                     {/* Next Button */}
                     <Button
                       onClick={handleNext}
