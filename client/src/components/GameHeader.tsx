@@ -8,7 +8,6 @@ interface GameHeaderProps {
   currentStage: string;
   stageIndex: number;
   totalStages: number;
-  score: number;
 }
 
 // Define stage color mapping
@@ -57,10 +56,6 @@ export default function GameHeader({ level, topic, currentStage, stageIndex, tot
               <div className="text-center">
                 <span className={`font-bold text-lg ${colorScheme.text}`}>{currentStage}</span>
                 <span className="text-sm text-gray-500 ml-2">({stageIndex + 1}/{totalStages})</span>
-              </div>
-              <div className="flex items-center bg-gradient-to-r from-amber-100 to-amber-200 px-3 py-1 rounded-full">
-                <i className="fas fa-star text-amber-500 mr-2"></i>
-                <span className="font-bold text-amber-700">{score}</span>
               </div>
             </div>
 

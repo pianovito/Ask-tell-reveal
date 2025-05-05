@@ -670,8 +670,6 @@ export default function GamePage() {
               topicName={isFreeMode ? customTopic : (topic?.name || "Topic")}
               keywordsUsed={gameStats.keywordsUsed}
               roundsCompleted={gameStats.roundsCompleted}
-              score={gameStats.score}
-              stagesCompleted={gameStats.stagesCompleted}
               showTeacherDashboardOptions={true}
             />
           ) : !showComplete ? (
@@ -687,7 +685,6 @@ export default function GamePage() {
                 }
                 stageIndex={currentStageIndex}
                 totalStages={stageSequence.length}
-                score={gameStats.score}
               />
 
               {wantNewPrompts ? (
