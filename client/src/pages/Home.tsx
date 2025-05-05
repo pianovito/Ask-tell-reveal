@@ -8,6 +8,8 @@ import TopicSelector from "@/components/TopicSelector";
 import HelpModal from "@/components/HelpModal";
 import { CEFRLevel, Topic } from "@/lib/types";
 import { useToast } from "@/hooks/use-toast";
+import { motion } from "framer-motion";
+import { Input } from "@/components/ui/input";
 
 export default function Home() {
   const [selectedLevel, setSelectedLevel] = useState<CEFRLevel>("B1");
@@ -170,6 +172,27 @@ export default function Home() {
                 </p>
               </Label>
             </div>
+            
+            {isRandomMode && (
+              <div className="mt-3 border-t border-purple-100 pt-3">
+                <div className="flex flex-col items-center justify-center space-y-3">
+                  <p className="text-sm text-[#9b59b6] font-medium flex items-center">
+                    <motion.div
+                      animate={{ rotate: 360 }}
+                      transition={{ 
+                        repeat: Infinity,
+                        duration: 3,
+                        ease: "linear" 
+                      }}
+                      className="inline-block mr-2"
+                    >
+                      <i className="fas fa-sync-alt"></i>
+                    </motion.div> 
+                    Spin Topic Wheel - Topic will change automatically after each round
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Start Button */}

@@ -8,6 +8,7 @@ interface GameHeaderProps {
   currentStage: string;
   stageIndex: number;
   totalStages: number;
+  groupXP?: number; // Add optional XP count
 }
 
 // Define stage color mapping
@@ -17,7 +18,7 @@ const stageColors = {
   "Reveal": { bg: "bg-[#9b59b6]/10", text: "text-[#9b59b6]", border: "border-[#9b59b6]", progress: "from-[#9b59b6]/50 to-[#9b59b6]" }
 };
 
-export default function GameHeader({ level, topic, currentStage, stageIndex, totalStages }: GameHeaderProps) {
+export default function GameHeader({ level, topic, currentStage, stageIndex, totalStages, groupXP = 0 }: GameHeaderProps) {
   // Get the color scheme for the current stage
   const colorScheme = stageColors[currentStage as keyof typeof stageColors] || stageColors["Ask"];
 
