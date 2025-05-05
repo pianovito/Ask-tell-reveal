@@ -7,7 +7,6 @@ import { useEffect, useState } from "react";
 interface PromptCardProps {
   prompt: Prompt;
   isLoading: boolean;
-  score?: number; // Add score prop
 }
 
 const stageColors = {
@@ -22,7 +21,7 @@ const stageBgColors = {
   "Reveal": "bg-[#9b59b6]/10"
 };
 
-export default function PromptCard({ prompt, isLoading, score = 5 }: PromptCardProps) {
+export default function PromptCard({ prompt, isLoading }: PromptCardProps) {
   // Random vocabulary challenge with 50% chance if not already set
   const [vocabularyChallenge, setVocabularyChallenge] = useState<string | undefined>(prompt.vocabularyChallenge);
   
@@ -69,21 +68,10 @@ export default function PromptCard({ prompt, isLoading, score = 5 }: PromptCardP
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="flex justify-between items-center mb-3">
+      <div className="mb-3">
         <span className={`font-['Quicksand'] text-lg font-bold ${stageColors[prompt.stage]}`}>
           {prompt.stage}
         </span>
-        
-        {/* Group XP Indicator */}
-        <motion.div
-          initial={{ scale: 0.9 }}
-          animate={{ scale: 1.1 }}
-          transition={{ duration: 0.5, repeat: Infinity, repeatType: "reverse" }}
-        >
-          <div className="flex items-center justify-center w-10 h-10 rounded-full bg-[#2ecc71] text-white font-bold shadow-md">
-            +5
-          </div>
-        </motion.div>
       </div>
       
       <h3 className="font-['Quicksand'] text-xl md:text-2xl font-bold mb-3 text-[#34495e]">
@@ -106,7 +94,7 @@ export default function PromptCard({ prompt, isLoading, score = 5 }: PromptCardP
             <i className="fas fa-book mr-2"></i> Vocabulary Challenge
           </h4>
           <p className="text-sm text-gray-700">
-            Include the word <span className="font-bold">{vocabularyChallenge}</span> in your response for bonus XP!
+            Try to include the word <span className="font-bold">{vocabularyChallenge}</span> in your response!
           </p>
         </motion.div>
       )}
