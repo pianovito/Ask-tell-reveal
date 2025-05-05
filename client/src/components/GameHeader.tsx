@@ -8,7 +8,6 @@ interface GameHeaderProps {
   currentStage: string;
   stageIndex: number;
   totalStages: number;
-  groupXP?: number; // Add optional XP count
 }
 
 // Define stage color mapping
@@ -18,7 +17,7 @@ const stageColors = {
   "Reveal": { bg: "bg-[#9b59b6]/10", text: "text-[#9b59b6]", border: "border-[#9b59b6]", progress: "from-[#9b59b6]/50 to-[#9b59b6]" }
 };
 
-export default function GameHeader({ level, topic, currentStage, stageIndex, totalStages, groupXP = 0 }: GameHeaderProps) {
+export default function GameHeader({ level, topic, currentStage, stageIndex, totalStages }: GameHeaderProps) {
   // Get the color scheme for the current stage
   const colorScheme = stageColors[currentStage as keyof typeof stageColors] || stageColors["Ask"];
 
@@ -66,18 +65,7 @@ export default function GameHeader({ level, topic, currentStage, stageIndex, tot
               />
             </div>
             
-            {/* XP Counter */}
-            <div className="mt-2 flex items-center justify-center">
-              <motion.div
-                initial={{ scale: 1 }}
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{ duration: 0.6, repeat: 3, repeatType: "reverse" }}
-                className="bg-yellow-100 border border-yellow-300 rounded-full px-3 py-1 text-sm font-bold text-yellow-700 flex items-center"
-              >
-                <i className="fas fa-star text-yellow-500 mr-1"></i>
-                <span>{groupXP} XP</span>
-              </motion.div>
-            </div>
+
           </div>
         </div>
 

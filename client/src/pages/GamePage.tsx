@@ -489,30 +489,16 @@ export default function GamePage() {
   };
 
   const handleKeywordClick = (word: string) => {
-    // Add 1 XP per keyword clicked
-    const newXP = groupXP + 1;
-    setGroupXP(newXP); 
-    
-    // Track keywords used count
+    // Track keywords used count only for UX purposes
     const newKeywordsUsed = keywordsUsed + 1;
     setKeywordsUsed(newKeywordsUsed);
     
-    // Update count in localStorage
-    localStorage.setItem('keywordsUsed', newKeywordsUsed.toString());
-    localStorage.setItem('groupXP', newXP.toString());
+    console.log(`Keyword clicked: ${word}`);
     
-    // Dispatch custom event for XP update to ensure it's reflected everywhere
-    const event = new CustomEvent('xpUpdated', { 
-      detail: { xp: newXP } 
-    });
-    window.dispatchEvent(event);
-    
-    console.log(`Keyword clicked: ${word}, +1 XP added. Total: ${newXP}`);
-    
-    // Show toast notification
+    // Show toast notification without XP reference
     toast({
-      title: `+1 XP (Total: ${newXP})`,
-      description: `Used keyword: "${word}"`,
+      title: `Keyword Used`,
+      description: `You used the keyword: "${word}"`,
       variant: "default",
     });
   };
@@ -676,7 +662,7 @@ export default function GamePage() {
                 }
                 stageIndex={currentStageIndex}
                 totalStages={stageSequence.length}
-                groupXP={groupXP}
+
               />
 
               {wantNewPrompts ? (
